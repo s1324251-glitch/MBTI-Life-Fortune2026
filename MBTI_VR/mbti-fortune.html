@@ -1,0 +1,1698 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#EAFBFF">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="MBTI Fortune">
+
+<title>MBTI Life Fortune</title>
+
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icon-192.png">
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<style>
+:root{
+  --blue:#55cdea;
+  --deep:#0a7ea8;
+  --soft:#eafaff;
+  --text:#315f70;
+  --pink:#ffdce9;
+  --mint:#daf7e9;
+  --campus:#dcefff;
+  --white:rgba(255,255,255,.88);
+  --shadow:0 18px 55px rgba(62,145,175,.16);
+}
+
+*{box-sizing:border-box}
+
+html,body{
+  margin:0;
+  min-height:100%;
+  font-family:"Yu Gothic","Hiragino Kaku Gothic ProN",system-ui,sans-serif;
+  color:var(--text);
+  -webkit-tap-highlight-color:transparent;
+}
+
+body{
+  min-height:100dvh;
+  overflow-x:hidden;
+  background:
+    radial-gradient(circle at 15% 12%, rgba(255,255,255,.98) 0 3%, transparent 18%),
+    radial-gradient(circle at 88% 10%, rgba(255,214,232,.62), transparent 30%),
+    radial-gradient(circle at 20% 92%, rgba(184,238,255,.65), transparent 34%),
+    linear-gradient(160deg,#e8fbff 0%,#f7f1ff 48%,#fff1f7 100%);
+}
+
+button,a{font:inherit}
+button{touch-action:manipulation}
+
+.bg-orb{
+  position:fixed;
+  border-radius:50%;
+  filter:blur(1px);
+  pointer-events:none;
+  z-index:-1;
+}
+.bg-orb.one{
+  width:210px;height:210px;
+  right:-80px;top:18%;
+  background:rgba(127,222,239,.18);
+}
+.bg-orb.two{
+  width:180px;height:180px;
+  left:-70px;bottom:13%;
+  background:rgba(255,177,207,.16);
+}
+.bg-grid{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:-2;
+  opacity:.18;
+  background-image:
+    linear-gradient(rgba(255,255,255,.8) 1px, transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.8) 1px, transparent 1px);
+  background-size:34px 34px;
+  mask-image:linear-gradient(to bottom,transparent,black 28%,black 75%,transparent);
+}
+
+/* ---------- 共通 ---------- */
+.screen{
+  display:none;
+  min-height:100dvh;
+  padding:
+    max(18px,env(safe-area-inset-top))
+    16px
+    max(28px,env(safe-area-inset-bottom));
+}
+.screen.active{display:block}
+
+.shell{
+  width:min(100%,520px);
+  margin:0 auto;
+}
+
+.glass{
+  background:rgba(255,255,255,.78);
+  border:1px solid rgba(255,255,255,.92);
+  box-shadow:var(--shadow);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+}
+
+.pill{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:30px;
+  padding:6px 12px;
+  border-radius:999px;
+  background:#e8f9ff;
+  color:#46869d;
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.08em;
+}
+
+.btn{
+  width:100%;
+  min-height:54px;
+  border:0;
+  border-radius:18px;
+  padding:13px 16px;
+  margin-top:10px;
+  cursor:pointer;
+  font-weight:800;
+}
+.btn-primary{
+  color:#fff;
+  background:linear-gradient(135deg,#52c8e7,#7bdce9);
+  box-shadow:0 10px 28px rgba(82,200,231,.27);
+}
+.btn-secondary{
+  color:#376f84;
+  background:#eefbff;
+  border:1px solid #d5f0f7;
+}
+.btn-pink{
+  color:#936176;
+  background:#fff0f6;
+  border:1px solid #ffdfeb;
+}
+.btn-ghost{
+  color:#668995;
+  background:transparent;
+  border:1px solid #d8edf3;
+}
+
+/* ---------- onboarding ---------- */
+.intro-wrap{
+  min-height:calc(100dvh - 50px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.intro-card{
+  width:100%;
+  padding:30px 22px 22px;
+  border-radius:32px;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+}
+
+.intro-card:before{
+  content:"";
+  position:absolute;
+  width:145px;height:145px;
+  border-radius:50%;
+  right:-65px;top:-55px;
+  background:rgba(255,211,229,.48);
+}
+.intro-card:after{
+  content:"";
+  position:absolute;
+  width:120px;height:120px;
+  border-radius:50%;
+  left:-50px;bottom:-45px;
+  background:rgba(184,238,255,.46);
+}
+
+.intro-card>*{position:relative;z-index:1}
+
+.logo-mark{
+  width:76px;height:76px;
+  margin:15px auto 17px;
+  display:grid;
+  place-items:center;
+  border-radius:25px;
+  background:linear-gradient(145deg,#f9feff,#dff8ff);
+  box-shadow:0 12px 28px rgba(72,173,204,.16);
+  color:var(--deep);
+  font-size:31px;
+}
+
+h1{
+  margin:0;
+  font-size:clamp(30px,9vw,42px);
+  line-height:1.05;
+  color:var(--deep);
+  letter-spacing:-.03em;
+}
+.intro-copy{
+  margin:14px auto 22px;
+  max-width:350px;
+  line-height:1.8;
+  color:#628897;
+  font-size:14px;
+}
+
+.disclaimer{
+  margin-top:14px;
+  color:#91a7af;
+  font-size:10px;
+  line-height:1.6;
+}
+
+/* ---------- MBTI説明 ---------- */
+.info-card{
+  border-radius:28px;
+  padding:22px 18px;
+}
+.topbar{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:16px;
+}
+.back{
+  width:42px;height:42px;
+  border:0;border-radius:14px;
+  background:rgba(255,255,255,.82);
+  color:var(--deep);
+  font-size:22px;
+}
+.topbar h2{
+  margin:0;
+  color:var(--deep);
+  font-size:20px;
+}
+.info-lead{
+  margin:0 0 14px;
+  font-size:13px;
+  line-height:1.8;
+  color:#638592;
+}
+.axis-grid{
+  display:grid;
+  gap:9px;
+}
+.axis{
+  border-radius:18px;
+  padding:13px 14px;
+  background:rgba(235,249,253,.9);
+}
+.axis b{
+  display:block;
+  margin-bottom:4px;
+  color:#237896;
+  font-size:15px;
+}
+.axis span{
+  font-size:12px;
+  line-height:1.6;
+  color:#5b7f8c;
+}
+.official-note{
+  margin:14px 0 4px;
+  border-radius:17px;
+  padding:12px 13px;
+  background:#fff8fb;
+  color:#7e6c76;
+  font-size:11px;
+  line-height:1.65;
+}
+
+/* ---------- メインアプリ ---------- */
+.app-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:15px;
+}
+.app-title small{
+  display:block;
+  color:#7fa1ad;
+  font-size:10px;
+  letter-spacing:.1em;
+  font-weight:800;
+}
+.app-title strong{
+  color:var(--deep);
+  font-size:24px;
+  line-height:1.1;
+}
+.round-btn{
+  width:44px;height:44px;
+  border:0;border-radius:15px;
+  background:rgba(255,255,255,.80);
+  box-shadow:0 8px 22px rgba(53,143,170,.12);
+  color:var(--deep);
+  font-size:19px;
+}
+
+.hero{
+  padding:17px 17px 15px;
+  border-radius:25px;
+  margin-bottom:13px;
+  overflow:hidden;
+  position:relative;
+}
+.hero:after{
+  content:"✦";
+  position:absolute;
+  right:18px;top:12px;
+  color:#fff;
+  font-size:28px;
+  opacity:.8;
+}
+.hero .eyebrow{
+  font-size:10px;
+  letter-spacing:.11em;
+  font-weight:900;
+  color:#5d91a4;
+}
+.hero h2{
+  margin:5px 0 5px;
+  color:#287d99;
+  font-size:20px;
+}
+.hero p{
+  margin:0;
+  font-size:11px;
+  color:#6e929e;
+}
+
+/* category */
+.category-tabs{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+  margin:12px 0 16px;
+}
+.category{
+  min-height:56px;
+  border:1px solid rgba(255,255,255,.9);
+  border-radius:18px;
+  background:rgba(255,255,255,.62);
+  color:#648894;
+  font-weight:900;
+  font-size:12px;
+}
+.category span{
+  display:block;
+  margin-bottom:2px;
+  font-size:18px;
+}
+.category.active[data-category="love"]{
+  background:linear-gradient(145deg,#ffe8f1,#ffd6e6);
+  color:#a15d77;
+}
+.category.active[data-category="health"]{
+  background:linear-gradient(145deg,#e9fff3,#d7f7e6);
+  color:#4d9272;
+}
+.category.active[data-category="campus"]{
+  background:linear-gradient(145deg,#eef9ff,#d9efff);
+  color:#4b83a6;
+}
+
+.section-title{
+  display:flex;
+  align-items:end;
+  justify-content:space-between;
+  margin:0 2px 10px;
+}
+.section-title h3{
+  margin:0;
+  color:#326e83;
+  font-size:16px;
+}
+.section-title button{
+  border:0;
+  background:transparent;
+  color:#72a0b0;
+  font-size:11px;
+  text-decoration:underline;
+}
+
+/* MBTI 4x4 */
+.mbti-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;
+}
+.mbti-btn{
+  aspect-ratio:1.18/1;
+  min-height:62px;
+  border:1px solid rgba(255,255,255,.95);
+  border-radius:18px;
+  background:rgba(255,255,255,.74);
+  color:#377b94;
+  font-weight:900;
+  font-size:14px;
+  box-shadow:0 8px 22px rgba(65,149,176,.08);
+  transition:transform .15s ease,background .2s ease,box-shadow .2s ease;
+}
+.mbti-btn:active{
+  transform:scale(.94);
+}
+.mbti-btn.selected{
+  color:#fff;
+  background:linear-gradient(145deg,#55cdea,#8adfea);
+  box-shadow:0 11px 28px rgba(70,193,220,.28);
+}
+
+.selection{
+  margin-top:14px;
+  padding:14px 15px;
+  border-radius:20px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+.selection div{
+  min-width:0;
+}
+.selection small{
+  display:block;
+  color:#90a7af;
+  font-size:10px;
+}
+.selection strong{
+  color:#2b718b;
+  font-size:17px;
+}
+.fortune-btn{
+  width:auto;
+  min-width:112px;
+  min-height:46px;
+  margin:0;
+  padding:10px 14px;
+}
+.fortune-btn:disabled{
+  opacity:.45;
+}
+
+/* music sheet */
+.sheet-backdrop,
+.result-backdrop,
+.loading-backdrop{
+  position:fixed;
+  inset:0;
+  z-index:50;
+  display:none;
+  align-items:flex-end;
+  justify-content:center;
+  padding:14px;
+  background:rgba(34,80,97,.18);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+}
+.sheet{
+  width:min(100%,500px);
+  border-radius:28px;
+  padding:18px;
+  background:rgba(255,255,255,.95);
+  box-shadow:0 -18px 60px rgba(34,90,108,.20);
+}
+.handle{
+  width:42px;height:5px;
+  margin:0 auto 15px;
+  border-radius:99px;
+  background:#d6e7ec;
+}
+.music-options{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:8px;
+  margin-top:12px;
+}
+.music-opt{
+  min-height:48px;
+  border:1px solid #e1f0f4;
+  border-radius:16px;
+  background:#f7fcfe;
+  color:#527f90;
+  font-weight:800;
+}
+.music-opt.active{
+  background:#ddf7ff;
+  color:#147995;
+  border-color:#bfeaf5;
+}
+.music-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-top:13px;
+  padding:12px;
+  border-radius:16px;
+  background:#f6fbfd;
+}
+.small-control{
+  border:0;border-radius:12px;
+  min-width:42px;min-height:38px;
+  background:#e5f6fa;color:#33778e;font-weight:900;
+}
+
+/* loading */
+.loading-backdrop{
+  z-index:80;
+  align-items:center;
+}
+.loading-card{
+  width:min(88%,320px);
+  padding:26px 20px;
+  border-radius:28px;
+  text-align:center;
+  background:rgba(255,255,255,.94);
+}
+.loading-stars{
+  font-size:26px;
+  letter-spacing:8px;
+  animation:pulse 1s infinite alternate;
+}
+@keyframes pulse{
+  from{transform:scale(.95);opacity:.55}
+  to{transform:scale(1.08);opacity:1}
+}
+
+/* result */
+.result-backdrop{
+  z-index:90;
+  align-items:center;
+  padding:max(16px,env(safe-area-inset-top)) 14px max(16px,env(safe-area-inset-bottom));
+}
+.result-card{
+  width:min(calc(100vw - 20px),540px);
+  max-height:calc(100dvh - 24px);
+  overflow-y:auto;
+  overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  border-radius:28px;
+  padding:14px;
+  background:rgba(255,255,255,.97);
+  box-shadow:0 22px 70px rgba(31,87,105,.24);
+}
+.result-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  padding:4px 3px 11px;
+}
+.result-head strong{
+  color:#277992;
+}
+.close-btn{
+  width:38px;height:38px;
+  border:0;border-radius:13px;
+  background:#fff0f5;
+  color:#b66581;
+  font-size:18px;
+}
+.result-image-wrap{
+  width:100%;
+  min-height:0;
+  display:block;
+  overflow:visible;
+  border-radius:20px;
+  background:linear-gradient(145deg,#f7fdff,#fff7fb);
+  padding:4px;
+}
+#resultImage{
+  display:block;
+  width:100%;
+  max-width:100%;
+  height:auto;
+  max-height:none;
+  object-fit:contain;
+  object-position:center;
+  border-radius:16px;
+}
+#errorText{
+  display:none;
+  padding:30px 15px;
+  color:#bb657b;
+  text-align:center;
+  font-size:12px;
+  line-height:1.7;
+}
+
+
+.footer-note{
+  padding:20px 4px 4px;
+  text-align:center;
+  color:#91a7af;
+  font-size:9px;
+  line-height:1.6;
+}
+
+/* ---------- 1分かんたんタイプ診断 ---------- */
+.quiz-wrap{
+  width:min(100%,520px);
+  margin:0 auto;
+}
+
+.quiz-card{
+  border-radius:28px;
+  padding:22px 18px 20px;
+}
+
+.quiz-progress-area{
+  margin:13px 0 20px;
+}
+
+.quiz-progress-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:8px;
+  color:#71939f;
+  font-size:11px;
+  font-weight:800;
+}
+
+.quiz-progress{
+  width:100%;
+  height:8px;
+  overflow:hidden;
+  border-radius:999px;
+  background:#e7f4f8;
+}
+
+.quiz-progress-bar{
+  width:12.5%;
+  height:100%;
+  border-radius:999px;
+  background:linear-gradient(90deg,#55cdea,#9be3ed);
+  transition:width .28s ease;
+}
+
+.quiz-question{
+  min-height:90px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:10px 7px 16px;
+  color:#2e7189;
+  font-size:19px;
+  line-height:1.55;
+  text-align:center;
+  font-weight:900;
+}
+
+.quiz-answers{
+  display:grid;
+  gap:10px;
+}
+
+.quiz-answer{
+  width:100%;
+  min-height:70px;
+  border:1px solid rgba(255,255,255,.95);
+  border-radius:20px;
+  padding:13px 14px;
+  background:rgba(245,252,255,.92);
+  box-shadow:0 8px 22px rgba(65,149,176,.08);
+  color:#4b7787;
+  text-align:left;
+  cursor:pointer;
+  transition:transform .13s ease, background .18s ease;
+}
+
+.quiz-answer:active{
+  transform:scale(.97);
+}
+
+.quiz-answer strong{
+  display:inline-grid;
+  place-items:center;
+  width:27px;
+  height:27px;
+  margin-right:8px;
+  border-radius:9px;
+  background:#dff6fc;
+  color:#197c9c;
+  vertical-align:middle;
+}
+
+.quiz-answer span{
+  vertical-align:middle;
+  font-size:13px;
+  line-height:1.55;
+  font-weight:700;
+}
+
+.quiz-note{
+  margin:15px 3px 0;
+  color:#91a7af;
+  font-size:10px;
+  line-height:1.6;
+  text-align:center;
+}
+
+.quiz-result{
+  display:none;
+  text-align:center;
+}
+
+.result-type-badge{
+  width:126px;
+  height:126px;
+  display:grid;
+  place-items:center;
+  margin:14px auto;
+  border-radius:38px;
+  background:
+    radial-gradient(circle at 30% 20%,#ffffff,transparent 35%),
+    linear-gradient(145deg,#dff8ff,#ffeaf3);
+  box-shadow:0 16px 38px rgba(74,170,199,.16);
+  color:#0a7ea8;
+  font-size:30px;
+  font-weight:900;
+  letter-spacing:.03em;
+}
+
+.result-mini-copy{
+  margin:0 auto 14px;
+  max-width:340px;
+  color:#638592;
+  font-size:12px;
+  line-height:1.7;
+}
+
+.quiz-secondary-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:8px;
+}
+
+.quiz-mini-btn{
+  min-height:45px;
+  border:1px solid #d8edf3;
+  border-radius:15px;
+  background:#f7fcfe;
+  color:#5f8593;
+  font-size:11px;
+  font-weight:800;
+}
+
+
+/* 写真が切れないためのスマホ調整 */
+@media (max-width:520px){
+  .result-backdrop{
+    align-items:flex-start;
+    overflow-y:auto;
+    padding:
+      max(10px,env(safe-area-inset-top))
+      8px
+      max(10px,env(safe-area-inset-bottom));
+  }
+
+  .result-card{
+    margin:auto 0;
+    width:100%;
+    max-height:none;
+  }
+
+  #resultImage{
+    width:100%;
+    height:auto;
+  }
+}
+
+@media (max-width:360px){
+  .screen{padding-left:11px;padding-right:11px}
+  .mbti-grid{gap:6px}
+  .mbti-btn{min-height:57px;border-radius:15px;font-size:13px}
+  .category{font-size:11px}
+}
+
+@media (min-width:700px){
+  body{padding:16px 0}
+  .screen{min-height:calc(100dvh - 32px)}
+}
+</style>
+</head>
+
+<body>
+
+<div class="bg-grid"></div>
+<div class="bg-orb one"></div>
+<div class="bg-orb two"></div>
+
+<!-- =======================
+     1. 最初の画面
+======================= -->
+<section id="welcomeScreen" class="screen active">
+  <div class="shell intro-wrap">
+    <div class="intro-card glass">
+      <div class="pill">MBTI × FORTUNE</div>
+      <div class="logo-mark">✦</div>
+      <h1>MBTI Life<br>Fortune</h1>
+      <p class="intro-copy">
+        自分のタイプを選んで、LOVE・HEALTH・CAMPUSの
+        3つのカテゴリーを楽しめるスマホ向け占いアプリです。
+      </p>
+
+      <button id="knowMbtiBtn" class="btn btn-primary">
+        MBTIタイプがわかる → はじめる
+      </button>
+
+      <button id="quickQuizBtn" class="btn btn-secondary">
+        MBTIがわからない → 1分でかんたん診断
+      </button>
+
+      <button id="dontKnowMbtiBtn" class="btn btn-ghost">
+        MBTIについて先に知りたい
+      </button>
+
+      <p class="disclaimer">
+        ※本アプリは公式MBTIサービスではありません。<br>
+        「1分かんたん診断」はアプリ内で楽しむための簡易判定です。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- =======================
+     2. MBTI説明
+======================= -->
+<section id="infoScreen" class="screen">
+  <div class="shell">
+    <div class="topbar">
+      <button class="back" id="infoBackBtn">‹</button>
+      <h2>MBTIについて</h2>
+    </div>
+
+    <div class="info-card glass">
+      <div class="pill">WHAT IS MBTI?</div>
+
+      <p class="info-lead">
+        MBTIは、人の「心の認知パターン」を理解するための方法です。
+        公式MBTIでは、4つの指標をもとに自分への理解を深めていきます。
+      </p>
+
+      <div class="axis-grid">
+        <div class="axis">
+          <b>E / I</b>
+          <span>興味関心の方向：外向 / 内向</span>
+        </div>
+
+        <div class="axis">
+          <b>S / N</b>
+          <span>ものの見方：感覚 / 直観</span>
+        </div>
+
+        <div class="axis">
+          <b>T / F</b>
+          <span>判断のしかた：思考 / 感情</span>
+        </div>
+
+        <div class="axis">
+          <b>J / P</b>
+          <span>外界への接し方：判断的態度 / 知覚的態度</span>
+        </div>
+      </div>
+
+      <div class="official-note">
+        日本MBTI協会によると、正式なMBTIは無料のWeb診断ではありません。
+        正式に受ける場合は、MBTI認定ユーザーによる支援を含むセッションで行われます。
+      </div>
+
+      <a class="btn btn-primary" style="display:flex;text-decoration:none;align-items:center;justify-content:center"
+         href="https://www.mbti.or.jp/discussion/05"
+         target="_blank" rel="noopener">
+        公式MBTIを受ける方法を見る
+      </a>
+
+      <a class="btn btn-secondary" style="display:flex;text-decoration:none;align-items:center;justify-content:center"
+         href="https://www.mbti.or.jp/what/"
+         target="_blank" rel="noopener">
+        日本MBTI協会の説明を見る
+      </a>
+
+      <button id="infoStartBtn" class="btn btn-pink">
+        説明を読んだ → アプリへ
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- =======================
+     3. 1分かんたんタイプ診断
+======================= -->
+<section id="quizScreen" class="screen">
+  <div class="quiz-wrap">
+
+    <div class="topbar">
+      <button class="back" id="quizBackBtn">‹</button>
+      <h2>1分かんたん診断</h2>
+    </div>
+
+    <div class="quiz-card glass">
+
+      <div id="quizQuestionsArea">
+        <div class="pill">8 QUESTIONS</div>
+
+        <div class="quiz-progress-area">
+          <div class="quiz-progress-head">
+            <span id="quizStepText">QUESTION 1 / 8</span>
+            <span id="quizAxisText">E / I</span>
+          </div>
+
+          <div class="quiz-progress">
+            <div id="quizProgressBar" class="quiz-progress-bar"></div>
+          </div>
+        </div>
+
+        <div id="quizQuestion" class="quiz-question">
+          質問を読み込んでいます…
+        </div>
+
+        <div class="quiz-answers">
+          <button id="quizAnswerA" class="quiz-answer">
+            <strong>A</strong>
+            <span></span>
+          </button>
+
+          <button id="quizAnswerB" class="quiz-answer">
+            <strong>B</strong>
+            <span></span>
+          </button>
+        </div>
+
+        <p class="quiz-note">
+          直感で近い方を選んでください。<br>
+          ※これは正式なMBTIではなく、このアプリを楽しむための簡易タイプ診断です。
+        </p>
+      </div>
+
+      <div id="quizResultArea" class="quiz-result">
+        <div class="pill">YOUR SIMPLE TYPE</div>
+
+        <div id="quizResultType" class="result-type-badge">
+          INFP
+        </div>
+
+        <h2 style="margin:0 0 8px;color:#277992">
+          簡易タイプが出ました！
+        </h2>
+
+        <p class="result-mini-copy">
+          8つの質問から、このアプリ内で使うための簡易タイプを判定しました。
+          正式なMBTI結果とは異なる場合があります。
+        </p>
+
+        <button id="useQuizTypeBtn" class="btn btn-primary">
+          このタイプで占いを始める ✦
+        </button>
+
+        <div class="quiz-secondary-actions">
+          <button id="retryQuizBtn" class="quiz-mini-btn">
+            もう一度診断
+          </button>
+
+          <button id="quizInfoBtn" class="quiz-mini-btn">
+            MBTIの説明を見る
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- =======================
+     4. メインアプリ
+======================= -->
+<section id="appScreen" class="screen">
+  <div class="shell">
+
+    <header class="app-header">
+      <div class="app-title">
+        <small>MBTI × FORTUNE</small>
+        <strong>Life Fortune</strong>
+      </div>
+
+      <button id="musicBtn" class="round-btn" aria-label="音楽設定">♫</button>
+    </header>
+
+    <div id="heroCard" class="hero glass">
+      <div class="eyebrow">TODAY'S FORTUNE</div>
+      <h2 id="heroTitle">LOVE Fortune</h2>
+      <p id="heroCopy">今日の恋愛運をMBTIタイプから楽しんでみよう。</p>
+    </div>
+
+    <div class="category-tabs">
+      <button class="category active" data-category="love">
+        <span>♡</span>LOVE
+      </button>
+      <button class="category" data-category="health">
+        <span>☘</span>HEALTH
+      </button>
+      <button class="category" data-category="campus">
+        <span>✎</span>CAMPUS
+      </button>
+    </div>
+
+    <div class="section-title">
+      <h3>あなたのMBTIは？</h3>
+      <button id="openQuickQuizFromApp">MBTIがわからない → かんたん診断</button>
+    </div>
+
+    <div class="mbti-grid" id="mbtiGrid">
+      <button class="mbti-btn" data-mbti="INTJ">INTJ</button>
+      <button class="mbti-btn" data-mbti="INTP">INTP</button>
+      <button class="mbti-btn" data-mbti="ENTJ">ENTJ</button>
+      <button class="mbti-btn" data-mbti="ENTP">ENTP</button>
+
+      <button class="mbti-btn" data-mbti="INFJ">INFJ</button>
+      <button class="mbti-btn" data-mbti="INFP">INFP</button>
+      <button class="mbti-btn" data-mbti="ENFJ">ENFJ</button>
+      <button class="mbti-btn" data-mbti="ENFP">ENFP</button>
+
+      <button class="mbti-btn" data-mbti="ISTJ">ISTJ</button>
+      <button class="mbti-btn" data-mbti="ISFJ">ISFJ</button>
+      <button class="mbti-btn" data-mbti="ESTJ">ESTJ</button>
+      <button class="mbti-btn" data-mbti="ESFJ">ESFJ</button>
+
+      <button class="mbti-btn" data-mbti="ISTP">ISTP</button>
+      <button class="mbti-btn" data-mbti="ISFP">ISFP</button>
+      <button class="mbti-btn" data-mbti="ESTP">ESTP</button>
+      <button class="mbti-btn" data-mbti="ESFP">ESFP</button>
+    </div>
+
+    <div class="selection glass">
+      <div>
+        <small>選択中</small>
+        <strong id="selectedLabel">MBTIを選んでね</strong>
+      </div>
+      <button id="fortuneBtn" class="btn btn-primary fortune-btn" disabled>
+        占う ✦
+      </button>
+    </div>
+
+    <p class="footer-note">
+      本アプリは日本MBTI協会・The Myers-Briggs Company等の公式アプリではありません。<br>
+      HEALTHカテゴリーは医療的な診断・助言を目的としたものではありません。
+    </p>
+  </div>
+</section>
+
+<!-- =======================
+     BGM設定
+======================= -->
+<div id="musicSheet" class="sheet-backdrop">
+  <div class="sheet">
+    <div class="handle"></div>
+    <div class="section-title">
+      <h3>BGM SETTINGS</h3>
+      <button id="closeMusic">閉じる</button>
+    </div>
+
+    <div class="music-options">
+      <button class="music-opt active" data-mode="AUTO">AUTO</button>
+      <button class="music-opt" data-mode="DREAMY">DREAMY</button>
+      <button class="music-opt" data-mode="CHILL">CHILL</button>
+      <button class="music-opt" data-mode="SPARKLE">SPARKLE</button>
+      <button class="music-opt" data-mode="LOFI">LOFI</button>
+    </div>
+
+    <div class="music-row">
+      <button id="musicPower" class="small-control">ON</button>
+      <strong id="musicNow">AUTO → SPARKLE</strong>
+      <div>
+        <button id="volDown" class="small-control">−</button>
+        <span id="volumeLabel" style="font-size:11px;margin:0 5px">60%</span>
+        <button id="volUp" class="small-control">＋</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- loading -->
+<div id="loading" class="loading-backdrop">
+  <div class="loading-card">
+    <div class="loading-stars">✦ ✧ ✦</div>
+    <h3 style="color:#247c99;margin:13px 0 6px">FORTUNE TIME</h3>
+    <div style="color:#7998a3;font-size:12px">今日の結果を準備しています…</div>
+  </div>
+</div>
+
+<!-- result -->
+<div id="resultModal" class="result-backdrop">
+  <div class="result-card">
+    <div class="result-head">
+      <strong id="resultTitle">RESULT</strong>
+      <button id="closeResult" class="close-btn">×</button>
+    </div>
+
+    <div class="result-image-wrap">
+      <img id="resultImage" alt="占い結果">
+      <div id="errorText"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+$(function(){
+
+  let selectedCategory = "love";
+  let selectedMbti = "";
+  let returnToApp = false;
+
+  /*
+   * ==========================================
+   * 8問・1分かんたんタイプ診断
+   * 正式なMBTIではなくアプリ内の簡易判定
+   * ==========================================
+   */
+  const quickQuizQuestions = [
+    {
+      axis:"E / I",
+      aLetter:"E",
+      bLetter:"I",
+      question:"初対面の人が多い場所では？",
+      a:"自分から話しかけてみることが多い",
+      b:"まず周りの様子を見ることが多い"
+    },
+    {
+      axis:"E / I",
+      aLetter:"E",
+      bLetter:"I",
+      question:"疲れた日の気分転換は？",
+      a:"誰かと話したり、一緒に過ごしたい",
+      b:"一人でゆっくり過ごしたい"
+    },
+    {
+      axis:"S / N",
+      aLetter:"S",
+      bLetter:"N",
+      question:"説明を聞くとき、分かりやすいのは？",
+      a:"具体例や実際のやり方がある説明",
+      b:"全体像やイメージから入る説明"
+    },
+    {
+      axis:"S / N",
+      aLetter:"S",
+      bLetter:"N",
+      question:"新しいアイデアを考えるときは？",
+      a:"現実的にできるかをまず考える",
+      b:"面白そうな可能性をまず考える"
+    },
+    {
+      axis:"T / F",
+      aLetter:"T",
+      bLetter:"F",
+      question:"友達が悩んでいたら？",
+      a:"どう解決できるかを一緒に考える",
+      b:"まず気持ちを聞いて寄り添う"
+    },
+    {
+      axis:"T / F",
+      aLetter:"T",
+      bLetter:"F",
+      question:"大事なことを決めるときは？",
+      a:"理由やメリットを整理して決める",
+      b:"自分や周囲の気持ちも大切にして決める"
+    },
+    {
+      axis:"J / P",
+      aLetter:"J",
+      bLetter:"P",
+      question:"旅行に行くなら？",
+      a:"事前に予定をある程度決めておきたい",
+      b:"その場の気分で決めるのも好き"
+    },
+    {
+      axis:"J / P",
+      aLetter:"J",
+      bLetter:"P",
+      question:"課題や提出物は？",
+      a:"できるだけ早めに終わらせたい",
+      b:"締切が近い方が集中しやすい"
+    }
+  ];
+
+  let quizIndex = 0;
+  let quizScores = {
+    E:0, I:0,
+    S:0, N:0,
+    T:0, F:0,
+    J:0, P:0
+  };
+  let quizResultType = "";
+
+  function resetQuickQuiz(){
+    quizIndex = 0;
+    quizResultType = "";
+
+    quizScores = {
+      E:0, I:0,
+      S:0, N:0,
+      T:0, F:0,
+      J:0, P:0
+    };
+
+    $("#quizResultArea").hide();
+    $("#quizQuestionsArea").show();
+
+    renderQuickQuizQuestion();
+  }
+
+  function renderQuickQuizQuestion(){
+    const q = quickQuizQuestions[quizIndex];
+
+    $("#quizStepText").text(
+      "QUESTION " + (quizIndex + 1) + " / " + quickQuizQuestions.length
+    );
+
+    $("#quizAxisText").text(q.axis);
+    $("#quizQuestion").text(q.question);
+
+    $("#quizAnswerA span").text(q.a);
+    $("#quizAnswerB span").text(q.b);
+
+    $("#quizProgressBar").css(
+      "width",
+      (((quizIndex + 1) / quickQuizQuestions.length) * 100) + "%"
+    );
+  }
+
+  function answerQuickQuiz(choice){
+    const q = quickQuizQuestions[quizIndex];
+
+    const letter =
+      choice === "A"
+        ? q.aLetter
+        : q.bLetter;
+
+    quizScores[letter]++;
+
+    if(quizIndex < quickQuizQuestions.length - 1){
+      quizIndex++;
+
+      $("#quizQuestion").fadeOut(90,function(){
+        renderQuickQuizQuestion();
+        $(this).fadeIn(130);
+      });
+
+      return;
+    }
+
+    finishQuickQuiz();
+  }
+
+  function chooseAxisLetter(letterA,letterB){
+    if(quizScores[letterA] > quizScores[letterB]){
+      return letterA;
+    }
+
+    if(quizScores[letterB] > quizScores[letterA]){
+      return letterB;
+    }
+
+    /*
+     * 2問ずつなので通常は同点もあり得る。
+     * 同点時は最後に選んだ側へ寄せず、
+     * アプリ用に固定ルールで後者を採用。
+     */
+    return letterB;
+  }
+
+  function finishQuickQuiz(){
+    quizResultType =
+      chooseAxisLetter("E","I") +
+      chooseAxisLetter("S","N") +
+      chooseAxisLetter("T","F") +
+      chooseAxisLetter("J","P");
+
+    $("#quizQuestionsArea").fadeOut(160,function(){
+      $("#quizResultType").text(quizResultType);
+      $("#quizResultArea").fadeIn(200);
+    });
+  }
+
+  $("#quickQuizBtn").on("click",function(){
+    returnToApp = false;
+    resetQuickQuiz();
+    showScreen("#quizScreen");
+  });
+
+  $("#openQuickQuizFromApp").on("click",function(){
+    returnToApp = true;
+    resetQuickQuiz();
+    showScreen("#quizScreen");
+  });
+
+  $("#quizBackBtn").on("click",function(){
+    showScreen(returnToApp ? "#appScreen" : "#welcomeScreen");
+  });
+
+  $("#quizAnswerA").on("click",function(){
+    playClick();
+    answerQuickQuiz("A");
+  });
+
+  $("#quizAnswerB").on("click",function(){
+    playClick();
+    answerQuickQuiz("B");
+  });
+
+  $("#retryQuizBtn").on("click",function(){
+    playClick();
+    resetQuickQuiz();
+  });
+
+  $("#quizInfoBtn").on("click",function(){
+    playClick();
+    returnToApp = false;
+    showScreen("#infoScreen");
+  });
+
+  $("#useQuizTypeBtn").on("click",function(){
+    if(!quizResultType) return;
+
+    selectedMbti = quizResultType;
+
+    $(".mbti-btn").removeClass("selected");
+
+    $('.mbti-btn[data-mbti="' + selectedMbti + '"]')
+      .addClass("selected");
+
+    $("#selectedLabel").text(
+      selectedMbti + " を選択中"
+    );
+
+    $("#fortuneBtn").prop("disabled",false);
+
+    showScreen("#appScreen");
+    startBgm();
+  });
+
+  const healthImages = {
+    INFP:"health_card_1.png",
+    ENFP:"health_card_2.png",
+    INFJ:"health_card_3.png",
+    ENFJ:"health_card_4.png",
+    INTJ:"health_card_5.png",
+    INTP:"health_card_6.png",
+    ENTJ:"health_card_7.png",
+    ENTP:"health_card_8.png",
+    ISTJ:"health_card_9.png",
+    ISFJ:"health_card_10.png",
+    ESTJ:"health_card_11.png",
+    ESFJ:"health_card_12.png",
+    ISTP:"health_card_13.png",
+    ISFP:"health_card_14.png",
+    ESTP:"health_card_15.png",
+    ESFP:"health_card_16.png"
+  };
+
+  const campusImages = {
+    INFP:"university_card_1.png",
+    ENFP:"university_card_2.png",
+    INFJ:"university_card_3.png",
+    ENFJ:"university_card_4.png",
+    INTJ:"university_card_5.png",
+    INTP:"university_card_6.png",
+    ENTJ:"university_card_7.png",
+    ENTP:"university_card_8.png",
+    ISTJ:"university_card_9.png",
+    ISFJ:"university_card_10.png",
+    ESTJ:"university_card_11.png",
+    ESFJ:"university_card_12.png",
+    ISTP:"university_card_13.png",
+    ISFP:"university_card_14.png",
+    ESTP:"university_card_15.png",
+    ESFP:"university_card_16.png"
+  };
+
+  function showScreen(id){
+    $(".screen").removeClass("active");
+    $(id).addClass("active");
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
+
+  $("#knowMbtiBtn").on("click",function(){
+    showScreen("#appScreen");
+    startBgm();
+  });
+
+  $("#dontKnowMbtiBtn").on("click",function(){
+    returnToApp = false;
+    showScreen("#infoScreen");
+  });
+
+  $("#infoBackBtn").on("click",function(){
+    showScreen(returnToApp ? "#appScreen" : "#welcomeScreen");
+  });
+
+  $("#infoStartBtn").on("click",function(){
+    showScreen("#appScreen");
+    startBgm();
+  });
+
+
+  $(".category").on("click",function(){
+    selectedCategory = $(this).data("category");
+
+    $(".category").removeClass("active");
+    $(this).addClass("active");
+
+    if(selectedCategory === "love"){
+      $("#heroTitle").text("LOVE Fortune");
+      $("#heroCopy").text("今日の恋愛運をMBTIタイプから楽しんでみよう。");
+    }else if(selectedCategory === "health"){
+      $("#heroTitle").text("HEALTH Fortune");
+      $("#heroCopy").text("今日のリラックスや気分転換のヒントを見てみよう。");
+    }else{
+      $("#heroTitle").text("CAMPUS Fortune");
+      $("#heroCopy").text("今日の大学生活・チャレンジのヒントを見てみよう。");
+    }
+
+    if(musicMode === "AUTO"){
+      restartBgm();
+    }
+  });
+
+  $(".mbti-btn").on("click",function(){
+    selectedMbti = $(this).data("mbti");
+    $(".mbti-btn").removeClass("selected");
+    $(this).addClass("selected");
+    $("#selectedLabel").text(selectedMbti + " を選択中");
+    $("#fortuneBtn").prop("disabled",false);
+    playClick();
+  });
+
+  $("#fortuneBtn").on("click",function(){
+    if(!selectedMbti) return;
+
+    let imagePath = "";
+
+    if(selectedCategory === "health"){
+      imagePath = "images/health/" + healthImages[selectedMbti];
+    }else if(selectedCategory === "campus"){
+      imagePath = "images/campus/" + campusImages[selectedMbti];
+    }else{
+      imagePath = "images/love/" + selectedMbti + ".jpeg";
+    }
+
+    $("#loading").css("display","flex").hide().fadeIn(180);
+
+    const preload = new Image();
+
+    preload.onload = function(){
+      setTimeout(function(){
+        $("#loading").fadeOut(180);
+        $("#errorText").hide();
+        $("#resultImage").attr("src",imagePath).show();
+        $("#resultTitle").text(selectedMbti + " / " + selectedCategory.toUpperCase());
+        $("#resultModal").css("display","flex").hide().fadeIn(220);
+        playResult();
+      },650);
+    };
+
+    preload.onerror = function(){
+      setTimeout(function(){
+        $("#loading").fadeOut(180);
+        $("#resultImage").hide();
+        $("#errorText")
+          .html("結果画像が見つかりません。<br><small>" + imagePath + "</small>")
+          .show();
+        $("#resultModal").css("display","flex").hide().fadeIn(220);
+      },400);
+    };
+
+    preload.src = imagePath;
+  });
+
+  $("#closeResult").on("click",function(){
+    $("#resultModal").fadeOut(180);
+  });
+
+  $("#resultModal").on("click",function(e){
+    if(e.target === this){
+      $(this).fadeOut(180);
+    }
+  });
+
+  /* -------------------------
+     BGM
+  ------------------------- */
+  let audioCtx = null;
+  let bgmTimer = null;
+  let nextNote = 0;
+  let noteIndex = 0;
+  let musicMode = "AUTO";
+  let bgmOn = true;
+  let volume = .6;
+
+  const presets = {
+    DREAMY:{
+      notes:[261.63,329.63,392,493.88,440,392,329.63,293.66],
+      interval:.54,duration:.85,wave:"sine"
+    },
+    CHILL:{
+      notes:[220,261.63,329.63,392,329.63,293.66,261.63,246.94],
+      interval:.72,duration:1.0,wave:"triangle"
+    },
+    SPARKLE:{
+      notes:[523.25,659.25,783.99,1046.5,880,783.99,659.25,587.33],
+      interval:.36,duration:.4,wave:"sine"
+    },
+    LOFI:{
+      notes:[196,261.63,220,164.81,174.61,261.63,196,146.83],
+      interval:.62,duration:.6,wave:"triangle"
+    }
+  };
+
+  function ensureAudio(){
+    if(!audioCtx){
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if(!AC) return false;
+      audioCtx = new AC();
+    }
+    if(audioCtx.state === "suspended") audioCtx.resume();
+    return true;
+  }
+
+  function autoMode(){
+    if(selectedCategory === "love") return "SPARKLE";
+    if(selectedCategory === "health") return "CHILL";
+    return "LOFI";
+  }
+
+  function activeMode(){
+    return musicMode === "AUTO" ? autoMode() : musicMode;
+  }
+
+  function updateMusicUI(){
+    $("#musicNow").text(
+      musicMode === "AUTO"
+        ? "AUTO → " + activeMode()
+        : activeMode()
+    );
+    $("#musicPower").text(bgmOn ? "ON" : "OFF");
+    $("#volumeLabel").text(Math.round(volume*100) + "%");
+    $(".music-opt").removeClass("active");
+    $('.music-opt[data-mode="'+musicMode+'"]').addClass("active");
+  }
+
+  function playTone(freq,start,duration,wave){
+    if(!audioCtx || !bgmOn) return;
+
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+
+    osc.type = wave;
+    osc.frequency.setValueAtTime(freq,start);
+
+    const peak = Math.max(.0002,.025*volume);
+    gain.gain.setValueAtTime(.0001,start);
+    gain.gain.exponentialRampToValueAtTime(peak,start+.04);
+    gain.gain.exponentialRampToValueAtTime(.0001,start+duration);
+
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    osc.start(start);
+    osc.stop(start+duration+.05);
+  }
+
+  function schedule(){
+    if(!audioCtx || !bgmOn) return;
+    const p = presets[activeMode()];
+
+    while(nextNote < audioCtx.currentTime + .4){
+      playTone(
+        p.notes[noteIndex % p.notes.length],
+        nextNote,
+        p.duration,
+        p.wave
+      );
+      nextNote += p.interval;
+      noteIndex++;
+    }
+  }
+
+  function startBgm(){
+    if(!ensureAudio()) return;
+    bgmOn = true;
+    restartBgm();
+  }
+
+  function restartBgm(){
+    if(!bgmOn || !ensureAudio()){
+      updateMusicUI();
+      return;
+    }
+
+    if(bgmTimer) clearInterval(bgmTimer);
+
+    noteIndex = 0;
+    nextNote = audioCtx.currentTime + .05;
+    schedule();
+    bgmTimer = setInterval(schedule,140);
+    updateMusicUI();
+  }
+
+  function stopBgm(){
+    bgmOn = false;
+    if(bgmTimer){
+      clearInterval(bgmTimer);
+      bgmTimer = null;
+    }
+    updateMusicUI();
+  }
+
+  function playClick(){
+    if(!ensureAudio()) return;
+    const t = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type="sine";
+    osc.frequency.setValueAtTime(620,t);
+    osc.frequency.exponentialRampToValueAtTime(820,t+.08);
+    gain.gain.setValueAtTime(.0001,t);
+    gain.gain.exponentialRampToValueAtTime(.05,t+.01);
+    gain.gain.exponentialRampToValueAtTime(.0001,t+.12);
+    osc.connect(gain);gain.connect(audioCtx.destination);
+    osc.start(t);osc.stop(t+.13);
+  }
+
+  function playResult(){
+    if(!ensureAudio()) return;
+    [784,988,1175].forEach(function(f,i){
+      setTimeout(function(){
+        playTone(f,audioCtx.currentTime,.22,"sine");
+      },i*65);
+    });
+  }
+
+  $("#musicBtn").on("click",function(){
+    playClick();
+    $("#musicSheet").css("display","flex").hide().fadeIn(180);
+  });
+
+  $("#closeMusic").on("click",function(){
+    $("#musicSheet").fadeOut(180);
+  });
+
+  $(".music-opt").on("click",function(){
+    musicMode = $(this).data("mode");
+    playClick();
+    restartBgm();
+  });
+
+  $("#musicPower").on("click",function(){
+    playClick();
+    bgmOn ? stopBgm() : startBgm();
+  });
+
+  $("#volDown").on("click",function(){
+    volume = Math.max(.2,Math.round((volume-.2)*10)/10);
+    updateMusicUI();
+  });
+
+  $("#volUp").on("click",function(){
+    volume = Math.min(1,Math.round((volume+.2)*10)/10);
+    updateMusicUI();
+  });
+
+  updateMusicUI();
+
+  /* PWA */
+  if("serviceWorker" in navigator){
+    window.addEventListener("load",function(){
+      navigator.serviceWorker.register("./sw.js").catch(console.log);
+    });
+  }
+
+});
+</script>
+</body>
+</html>

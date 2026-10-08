@@ -1,0 +1,4529 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+<meta charset="UTF-8">
+
+<meta
+name="viewport"
+content="width=device-width, initial-scale=1.0"
+>
+
+<title>MBTI Life Fortune VR</title>
+
+<meta name="theme-color" content="#CFF6FF">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="MBTI Fortune">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icon-192.png">
+
+
+<script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+
+<style>
+body {
+margin: 0;
+overflow: hidden;
+font-family: "Yu Gothic", sans-serif;
+background: #dff9ff;
+}
+
+/* ================================
+   スマホ用イントロ画面
+================================ */
+:root {
+    --app-blue: #55CDEA;
+    --app-deep: #0A7EA8;
+    --app-soft: #EAFBFF;
+    --app-pink: #FFDDE9;
+    --app-mint: #DDF8EE;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior: none;
+}
+
+.mobile-intro {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding:
+        max(20px, env(safe-area-inset-top))
+        18px
+        max(20px, env(safe-area-inset-bottom));
+    background:
+        radial-gradient(circle at 18% 18%, rgba(255,255,255,.95) 0 3%, transparent 18%),
+        radial-gradient(circle at 82% 16%, rgba(255,220,235,.58), transparent 28%),
+        radial-gradient(circle at 50% 92%, rgba(207,246,255,.92), transparent 34%),
+        linear-gradient(155deg, #e8fbff 0%, #f8f0ff 48%, #fff2f8 100%);
+    overflow-y: auto;
+}
+
+.mobile-intro::before,
+.mobile-intro::after {
+    content: "";
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(2px);
+    pointer-events: none;
+}
+
+.mobile-intro::before {
+    width: 210px;
+    height: 210px;
+    left: -75px;
+    bottom: 3%;
+    background: rgba(111, 218, 239, .15);
+}
+
+.mobile-intro::after {
+    width: 170px;
+    height: 170px;
+    right: -55px;
+    top: 4%;
+    background: rgba(255, 170, 200, .16);
+}
+
+.intro-card {
+    width: min(100%, 430px);
+    position: relative;
+    z-index: 1;
+    padding: 28px 22px 22px;
+    border: 1px solid rgba(255,255,255,.85);
+    border-radius: 30px;
+    background: rgba(255,255,255,.80);
+    box-shadow: 0 18px 60px rgba(41, 126, 157, .15);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    text-align: center;
+}
+
+.intro-badge {
+    display: inline-block;
+    padding: 7px 12px;
+    margin-bottom: 12px;
+    border-radius: 999px;
+    background: #e8f9ff;
+    color: #42869e;
+    font-size: 12px;
+    letter-spacing: .08em;
+    font-weight: 700;
+}
+
+.intro-card h1 {
+    margin: 0;
+    color: var(--app-deep);
+    font-size: clamp(27px, 8vw, 38px);
+    line-height: 1.1;
+}
+
+.intro-lead {
+    color: #588596;
+    line-height: 1.75;
+    font-size: 14px;
+    margin: 14px 0 22px;
+}
+
+.app-button {
+    width: 100%;
+    min-height: 52px;
+    border: 0;
+    border-radius: 18px;
+    margin-top: 10px;
+    padding: 12px 14px;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.app-button.primary {
+    color: white;
+    background: linear-gradient(135deg, #55CDEA, #76D8E8);
+    box-shadow: 0 8px 24px rgba(85, 205, 234, .27);
+}
+
+.app-button.secondary {
+    color: #356f83;
+    background: #edfaff;
+    border: 1px solid #d8f1f7;
+}
+
+.app-button.pink {
+    color: #9c5d74;
+    background: #fff0f6;
+    border: 1px solid #ffe0eb;
+}
+
+.app-button.ghost {
+    color: #6e8e99;
+    background: transparent;
+    border: 1px solid #dceff4;
+}
+
+.intro-note {
+    margin-top: 16px;
+    font-size: 11px;
+    color: #87a2ab;
+    line-height: 1.6;
+}
+
+#mbtiHelpScreen {
+    display: none;
+    text-align: left;
+}
+
+#mbtiHelpScreen h2 {
+    text-align: center;
+    color: var(--app-deep);
+    margin: 0 0 9px;
+}
+
+.help-copy {
+    color: #587f8d;
+    line-height: 1.75;
+    font-size: 13px;
+    margin-bottom: 14px;
+}
+
+.mbti-axis {
+    padding: 11px 12px;
+    margin: 8px 0;
+    border-radius: 16px;
+    background: rgba(237,250,255,.9);
+    color: #4d7888;
+    font-size: 12px;
+    line-height: 1.55;
+}
+
+.mbti-axis strong {
+    color: #257895;
+    font-size: 13px;
+}
+
+.help-warning {
+    margin: 13px 0;
+    padding: 11px;
+    border-radius: 14px;
+    background: #fff8fb;
+    color: #8c7380;
+    font-size: 11px;
+    line-height: 1.6;
+}
+
+.install-hint {
+    display: none;
+    margin-top: 12px;
+    padding: 11px 12px;
+    border-radius: 14px;
+    color: #567a87;
+    background: #f1fbfe;
+    font-size: 11px;
+    line-height: 1.55;
+}
+
+/* 小さいスマホ向け */
+@media (max-width: 390px) {
+    .intro-card {
+        padding: 22px 17px 18px;
+        border-radius: 25px;
+    }
+
+    .app-button {
+        min-height: 48px;
+        font-size: 14px;
+    }
+
+    .intro-lead {
+        font-size: 13px;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+
+<!-- =============================================
+     スマホアプリ用：最初の案内画面
+============================================= -->
+<div id="mobileIntro" class="mobile-intro">
+
+    <section id="introHome" class="intro-card">
+
+        <div class="intro-badge">MBTI × FORTUNE × VR</div>
+
+        <h1>MBTI Life<br>Fortune</h1>
+
+        <p class="intro-lead">
+            あなたのMBTIを選んで、<br>
+            LOVE・HEALTH・CAMPUSの運勢を楽しめるアプリです。
+        </p>
+
+        <button id="introStartButton" class="app-button primary">
+            MBTIを知っている → はじめる
+        </button>
+
+        <button id="showMbtiHelpButton" class="app-button secondary">
+            MBTIがわからない
+        </button>
+
+        <button id="installAppButton" class="app-button pink">
+            スマホのホーム画面に追加
+        </button>
+
+        <div id="installHint" class="install-hint"></div>
+
+        <p class="intro-note">
+            ※占い・アドバイスは楽しむためのコンテンツです。
+        </p>
+
+    </section>
+
+    <section id="mbtiHelpScreen" class="intro-card">
+
+        <div class="intro-badge">WHAT IS MBTI?</div>
+
+        <h2>MBTIって？</h2>
+
+        <p class="help-copy">
+            人のものの見方や判断の傾向を、4つの指標の組み合わせで
+            16タイプに整理して考える方法です。
+            このアプリでは、自分のタイプを選んで占いを楽しみます。
+        </p>
+
+        <div class="mbti-axis">
+            <strong>E / I</strong><br>
+            外の世界との関わりを好む傾向 / 自分の内側で考える傾向
+        </div>
+
+        <div class="mbti-axis">
+            <strong>S / N</strong><br>
+            具体的な情報を重視する傾向 / 可能性やイメージを重視する傾向
+        </div>
+
+        <div class="mbti-axis">
+            <strong>T / F</strong><br>
+            論理を重視して判断する傾向 / 気持ちや価値観を重視する傾向
+        </div>
+
+        <div class="mbti-axis">
+            <strong>J / P</strong><br>
+            計画的に進める傾向 / 状況に合わせて柔軟に進める傾向
+        </div>
+
+        <div class="help-warning">
+            まだ自分のタイプが分からない場合は、日本語の無料性格診断サイトで
+            確認してからアプリに戻ることもできます。<br>
+            ※16PersonalitiesはMBTI®公式検査とは別のサービスです。
+        </div>
+
+        <button id="openMbtiTestButton" class="app-button primary">
+            日本語の無料診断サイトを開く
+        </button>
+
+        <button id="helpToAppButton" class="app-button secondary">
+            説明は分かった → アプリへ
+        </button>
+
+        <button id="backIntroButton" class="app-button ghost">
+            戻る
+        </button>
+
+    </section>
+
+</div>
+
+<a-scene
+cursor="rayOrigin: mouse; fuse: false"
+raycaster="objects: .clickable"
+background="color: #CFF6FF"
+loading-screen="backgroundColor: #CFF6FF; dotsColor: #0A7EA8"
+renderer="antialias: true; colorManagement: true"
+fog="type: exponential; color: #EAFBFF; density: 0.012"
+>
+
+<!-- 背景 -->
+<a-sky id="mainSky" color="#CFF6FF"></a-sky>
+
+<!-- ========================= -->
+<!-- START画面 -->
+<!-- ========================= -->
+<a-entity id="startPanel">
+
+<a-plane
+id="startBlocker"
+class="clickable"
+position="0 1.7 -2.05"
+width="5.4"
+height="4.3"
+color="#EAFBFF"
+opacity="0.98"
+></a-plane>
+
+<a-text
+value="MBTI Life Fortune"
+align="center"
+position="0 2.75 -2.00"
+color="#0A7EA8"
+width="7.5"
+></a-text>
+
+<a-text
+value="Choose your MBTI and enjoy today's fortune!"
+align="center"
+position="0 2.20 -1.99"
+color="#397D96"
+width="4.5"
+></a-text>
+
+<a-text
+value="TODAY'S LITTLE FORTUNE"
+align="center"
+position="0 1.92 -1.99"
+color="#5F93A7"
+width="3.6"
+></a-text>
+
+<a-text
+value="LOVE / HEALTH / CAMPUS"
+align="center"
+position="0 1.65 -1.99"
+color="#87AEBB"
+width="3.4"
+></a-text>
+
+<a-octahedron
+position="-1.85 2.55 -1.92"
+radius="0.10"
+color="#FFFFFF"
+animation="property: rotation; to: 0 360 360; loop: true; dur: 3500; easing: linear"
+></a-octahedron>
+
+<a-octahedron
+position="1.75 2.42 -1.92"
+radius="0.08"
+color="#FFD9E8"
+animation="property: rotation; to: 360 0 360; loop: true; dur: 3000; easing: linear"
+></a-octahedron>
+
+<a-sphere
+position="-1.55 0.82 -1.92"
+radius="0.055"
+color="#BDEFFF"
+animation="property: position; from: -1.55 0.78 -1.92; to: -1.55 0.93 -1.92; dir: alternate; loop: true; dur: 1000"
+></a-sphere>
+
+<a-sphere
+position="1.55 0.88 -1.92"
+radius="0.045"
+color="#FFFFFF"
+animation="property: position; from: 1.55 0.82 -1.92; to: 1.55 0.98 -1.92; dir: alternate; loop: true; dur: 1300"
+></a-sphere>
+
+<a-box
+id="startButton"
+class="clickable"
+position="0 1.10 -1.95"
+width="2"
+height="0.55"
+depth="0.12"
+color="#55CDEA"
+animation="property: scale; from: 1 1 1; to: 1.06 1.06 1.06; dir: alternate; loop: true; dur: 900"
+></a-box>
+
+<a-text
+value="START"
+align="center"
+position="0 1.06 -1.87"
+color="#FFFFFF"
+width="3.5"
+></a-text>
+
+<a-text
+value="Tap START to begin"
+align="center"
+position="0 0.62 -1.99"
+color="#6F98A7"
+width="3.2"
+></a-text>
+
+</a-entity>
+
+<!-- ===================================================== -->
+<!-- MUSICボタン -->
+<!-- ===================================================== -->
+<a-entity id="musicControl" visible="false">
+
+<a-box
+id="musicButton"
+class="clickable"
+position="2.15 3.18 -3"
+width="1.55"
+height="0.38"
+depth="0.08"
+color="#B9EEF8"
+></a-box>
+
+<a-text
+id="musicButtonText"
+value="MUSIC MENU"
+align="center"
+position="2.15 3.155 -2.94"
+color="#075B76"
+width="2.45"
+></a-text>
+
+</a-entity>
+
+<!-- ===================================================== -->
+<!-- MUSIC SETTINGS -->
+<!-- ===================================================== -->
+<a-entity
+id="musicMenu"
+visible="false"
+scale="0.01 0.01 0.01"
+>
+
+<!-- 背景：奥のボタンを押さないためのブロッカー -->
+<a-plane
+id="musicMenuBlocker"
+class="clickable"
+position="0 1.62 -2.20"
+width="5.15"
+height="3.45"
+color="#F9FDFF"
+opacity="0.98"
+material="transparent: true; roughness: 0.22"
+></a-plane>
+
+<!-- 内側のガラス風 -->
+<a-plane
+position="0 1.62 -2.15"
+width="4.78"
+height="3.08"
+color="#DDF8FF"
+opacity="0.28"
+material="transparent: true"
+></a-plane>
+
+<a-text
+value="MUSIC SETTINGS"
+align="center"
+position="0 2.82 -2.08"
+color="#0A7EA8"
+width="4.4"
+></a-text>
+
+<a-text
+id="currentMusicText"
+value="AUTO  >  SPARKLE"
+align="center"
+position="0 2.50 -2.08"
+color="#5F93A7"
+width="3.1"
+></a-text>
+
+<!-- MUSIC ON/OFF -->
+<a-box
+id="musicPowerButton"
+class="clickable"
+position="-1.55 2.15 -2.03"
+width="1.25"
+height="0.38"
+depth="0.08"
+color="#8DDFEF"
+></a-box>
+
+<a-text
+id="musicPowerText"
+value="BGM : ON"
+align="center"
+position="-1.55 2.125 -1.97"
+color="#075B76"
+width="2.2"
+></a-text>
+
+<!-- AUTO -->
+<a-box
+class="music-mode-button clickable"
+data-music-mode="AUTO"
+position="0 2.15 -2.03"
+width="1.05"
+height="0.38"
+depth="0.08"
+color="#55CDEA"
+></a-box>
+
+<a-text
+value="AUTO"
+align="center"
+position="0 2.125 -1.97"
+color="#075B76"
+width="2.0"
+></a-text>
+
+<!-- 音量 -->
+<a-box
+id="volumeDownButton"
+class="clickable"
+position="1.05 2.15 -2.03"
+width="0.42"
+height="0.38"
+depth="0.08"
+color="#C9EFF7"
+></a-box>
+
+<a-text
+value="-"
+align="center"
+position="1.05 2.115 -1.97"
+color="#075B76"
+width="1.8"
+></a-text>
+
+<a-text
+id="volumeText"
+value="VOL 60%"
+align="center"
+position="1.55 2.125 -1.97"
+color="#397D96"
+width="1.55"
+></a-text>
+
+<a-box
+id="volumeUpButton"
+class="clickable"
+position="2.05 2.15 -2.03"
+width="0.42"
+height="0.38"
+depth="0.08"
+color="#C9EFF7"
+></a-box>
+
+<a-text
+value="+"
+align="center"
+position="2.05 2.115 -1.97"
+color="#075B76"
+width="1.8"
+></a-text>
+
+<!-- DREAMY -->
+<a-box
+class="music-mode-button clickable"
+data-music-mode="DREAMY"
+position="-1.65 1.55 -2.03"
+width="1.35"
+height="0.46"
+depth="0.08"
+color="#DFF5FF"
+></a-box>
+
+<a-text
+value="DREAMY"
+align="center"
+position="-1.65 1.515 -1.97"
+color="#397D96"
+width="2.1"
+></a-text>
+
+<!-- CHILL -->
+<a-box
+class="music-mode-button clickable"
+data-music-mode="CHILL"
+position="-0.55 1.55 -2.03"
+width="0.72"
+height="0.46"
+depth="0.08"
+color="#DFF5FF"
+></a-box>
+
+<a-text
+value="CHILL"
+align="center"
+position="-0.55 1.515 -1.97"
+color="#397D96"
+width="1.75"
+></a-text>
+
+<!-- SPARKLE -->
+<a-box
+class="music-mode-button clickable"
+data-music-mode="SPARKLE"
+position="0.55 1.55 -2.03"
+width="1.18"
+height="0.46"
+depth="0.08"
+color="#DFF5FF"
+></a-box>
+
+<a-text
+value="SPARKLE"
+align="center"
+position="0.55 1.515 -1.97"
+color="#397D96"
+width="1.85"
+></a-text>
+
+<!-- LOFI -->
+<a-box
+class="music-mode-button clickable"
+data-music-mode="LOFI"
+position="1.65 1.55 -2.03"
+width="0.72"
+height="0.46"
+depth="0.08"
+color="#DFF5FF"
+></a-box>
+
+<a-text
+value="LOFI"
+align="center"
+position="1.65 1.515 -1.97"
+color="#397D96"
+width="1.75"
+></a-text>
+
+<!-- 説明 -->
+<a-text
+value="AUTO changes music for LOVE / HEALTH / CAMPUS"
+align="center"
+position="0 1.02 -2.06"
+color="#6D9AAA"
+width="3.25"
+></a-text>
+
+<a-text
+value="LOVE: SPARKLE   HEALTH: CHILL   CAMPUS: LOFI"
+align="center"
+position="0 0.76 -2.06"
+color="#87AEBB"
+width="3.0"
+></a-text>
+
+<!-- 閉じる -->
+<a-circle
+id="musicMenuClose"
+class="clickable"
+position="2.22 2.84 -2.01"
+radius="0.20"
+color="#FFAAC0"
+></a-circle>
+
+<a-text
+value="X"
+align="center"
+position="2.22 2.805 -1.95"
+color="#FFFFFF"
+width="1.8"
+></a-text>
+
+</a-entity>
+
+<!-- 曲変更時に一瞬表示するトースト -->
+<a-entity
+id="musicToast"
+visible="false"
+scale="0.01 0.01 0.01"
+>
+
+<a-plane
+position="0 3.72 -2.70"
+width="2.7"
+height="0.48"
+color="#FFFFFF"
+opacity="0.92"
+material="transparent: true"
+></a-plane>
+
+<a-text
+id="musicToastText"
+value="SPARKLE MODE"
+align="center"
+position="0 3.685 -2.64"
+color="#0A7EA8"
+width="2.65"
+></a-text>
+
+</a-entity>
+
+
+
+
+<!-- ===================================================== -->
+<!-- ULTIMATE BACKGROUND：奥行きのある幻想空間 -->
+<!-- ===================================================== -->
+
+<!-- 遠景の巨大な月 -->
+<a-entity id="moonGroup">
+
+<a-circle
+id="moonCore"
+position="4.9 5.15 -13.5"
+radius="1.85"
+color="#FFFBEA"
+material="shader: flat; emissive: #FFFBEA; emissiveIntensity: 0.65; opacity: 0.95; transparent: true"
+></a-circle>
+
+<a-ring
+id="moonHalo1"
+position="4.9 5.15 -13.42"
+radius-inner="2.02"
+radius-outer="2.12"
+color="#FFFFFF"
+material="shader: flat; emissive: #FFFFFF; emissiveIntensity: 0.4; opacity: 0.28; transparent: true"
+animation="property: rotation; to: 0 0 360; loop: true; dur: 38000; easing: linear"
+></a-ring>
+
+<a-ring
+id="moonHalo2"
+position="4.9 5.15 -13.38"
+radius-inner="2.35"
+radius-outer="2.39"
+color="#D8F5FF"
+material="shader: flat; emissive: #D8F5FF; emissiveIntensity: 0.25; opacity: 0.20; transparent: true"
+animation="property: rotation; to: 0 0 -360; loop: true; dur: 52000; easing: linear"
+></a-ring>
+
+</a-entity>
+
+<!-- 左側の光のアーチ -->
+<a-entity id="leftLightArch" position="-4.8 1.9 -8.8" rotation="0 0 82">
+
+<a-torus
+radius="2.35"
+radius-tubular="0.032"
+arc="165"
+color="#FFFFFF"
+material="transparent: true; opacity: 0.35; emissive: #FFFFFF; emissiveIntensity: 0.35"
+></a-torus>
+
+<a-torus
+radius="2.05"
+radius-tubular="0.018"
+arc="165"
+color="#C8F2FF"
+material="transparent: true; opacity: 0.30; emissive: #C8F2FF; emissiveIntensity: 0.28"
+></a-torus>
+
+</a-entity>
+
+<!-- 右側の光のアーチ -->
+<a-entity id="rightLightArch" position="4.8 1.9 -8.8" rotation="0 180 -82">
+
+<a-torus
+radius="2.35"
+radius-tubular="0.032"
+arc="165"
+color="#FFFFFF"
+material="transparent: true; opacity: 0.35; emissive: #FFFFFF; emissiveIntensity: 0.35"
+></a-torus>
+
+<a-torus
+radius="2.05"
+radius-tubular="0.018"
+arc="165"
+color="#C8F2FF"
+material="transparent: true; opacity: 0.30; emissive: #C8F2FF; emissiveIntensity: 0.28"
+></a-torus>
+
+</a-entity>
+
+<!-- 奥行き用の淡い光の円盤 -->
+<a-entity id="farGlowLayers">
+
+<a-circle
+id="farGlowA"
+position="-4.8 1.4 -12.5"
+radius="3.6"
+color="#F4DDF4"
+material="shader: flat; transparent: true; opacity: 0.10; emissive: #F4DDF4; emissiveIntensity: 0.10"
+></a-circle>
+
+<a-circle
+id="farGlowB"
+position="0 5.7 -14.5"
+radius="4.0"
+color="#D8F6FF"
+material="shader: flat; transparent: true; opacity: 0.08; emissive: #D8F6FF; emissiveIntensity: 0.10"
+></a-circle>
+
+<a-circle
+id="farGlowC"
+position="5.0 0.3 -12.8"
+radius="3.2"
+color="#E4FFF2"
+material="shader: flat; transparent: true; opacity: 0.08; emissive: #E4FFF2; emissiveIntensity: 0.10"
+></a-circle>
+
+</a-entity>
+
+<!-- 星座ライン：左 -->
+<a-entity id="constellationLeft" position="-3.8 3.3 -9.2">
+
+<a-sphere position="-1.0 0.50 0" radius="0.07" color="#FFFFFF"
+material="emissive: #FFFFFF; emissiveIntensity: 0.8"></a-sphere>
+<a-sphere position="-0.35 0.82 0" radius="0.055" color="#FFF7C7"
+material="emissive: #FFF7C7; emissiveIntensity: 0.75"></a-sphere>
+<a-sphere position="0.28 0.20 0" radius="0.065" color="#FFFFFF"
+material="emissive: #FFFFFF; emissiveIntensity: 0.8"></a-sphere>
+<a-sphere position="0.95 0.58 0" radius="0.05" color="#D9F6FF"
+material="emissive: #D9F6FF; emissiveIntensity: 0.8"></a-sphere>
+<a-sphere position="0.52 -0.45 0" radius="0.052" color="#FFFFFF"
+material="emissive: #FFFFFF; emissiveIntensity: 0.75"></a-sphere>
+
+<a-entity line="start: -1 0.5 0; end: -0.35 0.82 0; color: #FFFFFF; opacity: 0.40"></a-entity>
+<a-entity line="start: -0.35 0.82 0; end: 0.28 0.20 0; color: #FFFFFF; opacity: 0.40"></a-entity>
+<a-entity line="start: 0.28 0.20 0; end: 0.95 0.58 0; color: #FFFFFF; opacity: 0.40"></a-entity>
+<a-entity line="start: 0.28 0.20 0; end: 0.52 -0.45 0; color: #FFFFFF; opacity: 0.40"></a-entity>
+
+</a-entity>
+
+<!-- 星座ライン：右 -->
+<a-entity id="constellationRight" position="3.5 2.0 -9.5" rotation="0 0 -12">
+
+<a-sphere position="-0.95 0.25 0" radius="0.05" color="#FFFFFF"
+material="emissive: #FFFFFF; emissiveIntensity: 0.75"></a-sphere>
+<a-sphere position="-0.25 0.70 0" radius="0.065" color="#DFF8FF"
+material="emissive: #DFF8FF; emissiveIntensity: 0.8"></a-sphere>
+<a-sphere position="0.48 0.38 0" radius="0.055" color="#FFF7C7"
+material="emissive: #FFF7C7; emissiveIntensity: 0.75"></a-sphere>
+<a-sphere position="1.00 0.92 0" radius="0.07" color="#FFFFFF"
+material="emissive: #FFFFFF; emissiveIntensity: 0.8"></a-sphere>
+<a-sphere position="0.68 -0.35 0" radius="0.048" color="#FFFFFF"
+material="emissive: #FFFFFF; emissiveIntensity: 0.75"></a-sphere>
+
+<a-entity line="start: -0.95 0.25 0; end: -0.25 0.70 0; color: #FFFFFF; opacity: 0.38"></a-entity>
+<a-entity line="start: -0.25 0.70 0; end: 0.48 0.38 0; color: #FFFFFF; opacity: 0.38"></a-entity>
+<a-entity line="start: 0.48 0.38 0; end: 1.00 0.92 0; color: #FFFFFF; opacity: 0.38"></a-entity>
+<a-entity line="start: 0.48 0.38 0; end: 0.68 -0.35 0; color: #FFFFFF; opacity: 0.38"></a-entity>
+
+</a-entity>
+
+<!-- 流れ星 1 -->
+<a-entity
+id="shootingStar1"
+position="-7 6.0 -10.5"
+animation="
+property: position;
+from: -7 6.0 -10.5;
+to: 7 2.6 -10.5;
+dur: 5200;
+delay: 1200;
+loop: true;
+easing: easeInQuad;
+"
+>
+
+<a-sphere
+radius="0.07"
+color="#FFFFFF"
+material="emissive: #FFFFFF; emissiveIntensity: 1"
+></a-sphere>
+
+<a-box
+position="-0.55 0.13 0"
+width="1.15"
+height="0.025"
+depth="0.02"
+rotation="0 0 -14"
+color="#D9F7FF"
+material="transparent: true; opacity: 0.35; emissive: #D9F7FF; emissiveIntensity: 0.45"
+></a-box>
+
+</a-entity>
+
+<!-- 流れ星 2 -->
+<a-entity
+id="shootingStar2"
+position="-6 4.8 -11.5"
+animation="
+property: position;
+from: -6 4.8 -11.5;
+to: 6.5 1.8 -11.5;
+dur: 6500;
+delay: 4200;
+loop: true;
+easing: easeInQuad;
+"
+>
+
+<a-sphere
+radius="0.055"
+color="#FFF8D6"
+material="emissive: #FFF8D6; emissiveIntensity: 0.9"
+></a-sphere>
+
+<a-box
+position="-0.45 0.10 0"
+width="0.95"
+height="0.02"
+depth="0.02"
+rotation="0 0 -13"
+color="#FFF4C9"
+material="transparent: true; opacity: 0.30; emissive: #FFF4C9; emissiveIntensity: 0.35"
+></a-box>
+
+</a-entity>
+
+<!-- 漂う光粒 -->
+<a-entity id="ambientParticles">
+
+<a-sphere position="-5.1 0.5 -7.6" radius="0.035" color="#FFFFFF"
+material="emissive: #FFFFFF; emissiveIntensity: 0.8"
+animation="property: position; from: -5.1 0.4 -7.6; to: -4.95 3.7 -7.6; dur: 7800; loop: true; dir: alternate; easing: easeInOutSine"></a-sphere>
+
+<a-sphere position="-3.7 1.1 -8.2" radius="0.028" color="#D8F6FF"
+material="emissive: #D8F6FF; emissiveIntensity: 0.8"
+animation="property: position; from: -3.7 0.8 -8.2; to: -3.55 4.0 -8.2; dur: 9200; loop: true; dir: alternate; easing: easeInOutSine"></a-sphere>
+
+<a-sphere position="-2.2 0.4 -7.9" radius="0.038" color="#FFF2C8"
+material="emissive: #FFF2C8; emissiveIntensity: 0.7"
+animation="property: position; from: -2.2 0.4 -7.9; to: -2.0 3.0 -7.9; dur: 7100; loop: true; dir: alternate; easing: easeInOutSine"></a-sphere>
+
+<a-sphere position="-0.8 1.2 -8.6" radius="0.025" color="#FFFFFF"
+material="emissive: #FFFFFF; emissiveIntensity: 0.8"
+animation="property: position; from: -0.8 0.9 -8.6; to: -0.65 4.6 -8.6; dur: 10300; loop: true; dir: alternate; easing: easeInOutSine"></a-sphere>
+
+<a-sphere position="0.7 0.7 -7.8" radius="0.032" color="#D8F6FF"
+material="emissive: #D8F6FF; emissiveIntensity: 0.8"
+animation="property: position; from: 0.7 0.6 -7.8; to: 0.82 3.6 -7.8; dur: 8600; loop: true; dir: alternate; easing: easeInOutSine"></a-sphere>
+
+<a-sphere position="2.1 1.3 -8.4" radius="0.038" color="#FFFFFF"
+material="emissive: #FFFFFF; emissiveIntensity: 0.8"
+animation="property: position; from: 2.1 0.9 -8.4; to: 2.25 4.3 -8.4; dur: 9700; loop: true; dir: alternate; easing: easeInOutSine"></a-sphere>
+
+<a-sphere position="3.6 0.6 -7.7" radius="0.029" color="#FFF2C8"
+material="emissive: #FFF2C8; emissiveIntensity: 0.7"
+animation="property: position; from: 3.6 0.5 -7.7; to: 3.75 3.4 -7.7; dur: 7600; loop: true; dir: alternate; easing: easeInOutSine"></a-sphere>
+
+<a-sphere position="5.0 1.0 -8.1" radius="0.035" color="#D8F6FF"
+material="emissive: #D8F6FF; emissiveIntensity: 0.8"
+animation="property: position; from: 5.0 0.7 -8.1; to: 5.15 4.1 -8.1; dur: 8900; loop: true; dir: alternate; easing: easeInOutSine"></a-sphere>
+
+</a-entity>
+
+<!-- ===================================================== -->
+<!-- DELUXE 背景・ガラスパネル -->
+<!-- ===================================================== -->
+
+<!-- 中央の半透明ガラスパネル -->
+<a-entity id="glassBoard">
+
+<a-plane
+position="0 1.45 -3.12"
+width="5.35"
+height="3.45"
+color="#FFFFFF"
+opacity="0.22"
+material="transparent: true; roughness: 0.15; metalness: 0.02"
+></a-plane>
+
+<!-- 上下左右の細いフレーム -->
+<a-box
+position="0 3.17 -3.08"
+width="5.35"
+height="0.035"
+depth="0.025"
+color="#FFFFFF"
+opacity="0.72"
+></a-box>
+
+<a-box
+position="0 -0.27 -3.08"
+width="5.35"
+height="0.035"
+depth="0.025"
+color="#FFFFFF"
+opacity="0.72"
+></a-box>
+
+<a-box
+position="-2.66 1.45 -3.08"
+width="0.035"
+height="3.45"
+depth="0.025"
+color="#FFFFFF"
+opacity="0.72"
+></a-box>
+
+<a-box
+position="2.66 1.45 -3.08"
+width="0.035"
+height="3.45"
+depth="0.025"
+color="#FFFFFF"
+opacity="0.72"
+></a-box>
+
+<!-- 四隅の光 -->
+<a-sphere
+position="-2.66 3.17 -3.02"
+radius="0.055"
+color="#FFFFFF"
+material="emissive: #FFFFFF; emissiveIntensity: 0.8"
+></a-sphere>
+
+<a-sphere
+position="2.66 3.17 -3.02"
+radius="0.055"
+color="#FFFFFF"
+material="emissive: #FFFFFF; emissiveIntensity: 0.8"
+></a-sphere>
+
+<a-sphere
+position="-2.66 -0.27 -3.02"
+radius="0.055"
+color="#FFFFFF"
+material="emissive: #FFFFFF; emissiveIntensity: 0.8"
+></a-sphere>
+
+<a-sphere
+position="2.66 -0.27 -3.02"
+radius="0.055"
+color="#FFFFFF"
+material="emissive: #FFFFFF; emissiveIntensity: 0.8"
+></a-sphere>
+
+</a-entity>
+
+<!-- 大きな背景リング -->
+<a-entity id="backgroundHalo">
+
+<a-torus
+id="haloOuter"
+position="0 1.75 -8.1"
+radius="4.25"
+radius-tubular="0.035"
+color="#FFFFFF"
+opacity="0.32"
+material="transparent: true; emissive: #FFFFFF; emissiveIntensity: 0.18"
+animation="property: rotation; to: 0 0 360; loop: true; dur: 45000; easing: linear"
+></a-torus>
+
+<a-torus
+id="haloMiddle"
+position="0 1.75 -7.9"
+radius="3.55"
+radius-tubular="0.024"
+color="#D7F7FF"
+opacity="0.30"
+material="transparent: true; emissive: #D7F7FF; emissiveIntensity: 0.15"
+animation="property: rotation; to: 0 0 -360; loop: true; dur: 38000; easing: linear"
+></a-torus>
+
+<a-torus
+id="haloInner"
+position="0 1.75 -7.7"
+radius="2.9"
+radius-tubular="0.018"
+color="#FFFFFF"
+opacity="0.24"
+material="transparent: true"
+animation="property: rotation; to: 0 0 360; loop: true; dur: 32000; easing: linear"
+></a-torus>
+
+</a-entity>
+
+<!-- カテゴリー別の背景柄をJSで生成 -->
+<a-entity id="lovePattern" visible="true"></a-entity>
+<a-entity id="healthPattern" visible="false"></a-entity>
+<a-entity id="campusPattern" visible="false"></a-entity>
+
+<!-- ===================================================== -->
+<!-- 装飾：空に浮かぶ占いステージ -->
+<!-- ===================================================== -->
+<a-entity id="worldDecoration">
+
+<a-cylinder
+position="0 -0.18 -3.8"
+radius="3.15"
+height="0.34"
+color="#DDFBFF"
+material="roughness: 0.8"
+></a-cylinder>
+
+<a-cone
+position="0 -1.25 -3.8"
+radius-bottom="0.25"
+radius-top="2.7"
+height="2.0"
+color="#C4EDF4"
+material="roughness: 0.9"
+></a-cone>
+
+<a-torus
+position="0 0.005 -3.8"
+rotation="90 0 0"
+radius="3.12"
+radius-tubular="0.035"
+color="#FFFFFF"
+material="emissive: #FFFFFF; emissiveIntensity: 0.18"
+></a-torus>
+
+<!-- 左の小さな雲 -->
+<a-entity
+position="-3.9 1.15 -5.4"
+animation="property: position; from: -3.9 1.10 -5.4; to: -3.55 1.22 -5.4; dir: alternate; loop: true; dur: 4200"
+>
+<a-sphere radius="0.45" color="#FFFFFF"></a-sphere>
+<a-sphere position="0.38 0.06 0" radius="0.34" color="#FFFFFF"></a-sphere>
+<a-sphere position="-0.36 0.03 0" radius="0.32" color="#FFFFFF"></a-sphere>
+</a-entity>
+
+<!-- 右の小さな雲 -->
+<a-entity
+position="3.8 1.45 -5.8"
+animation="property: position; from: 3.8 1.42 -5.8; to: 3.45 1.56 -5.8; dir: alternate; loop: true; dur: 5000"
+>
+<a-sphere radius="0.48" color="#FFFFFF"></a-sphere>
+<a-sphere position="0.42 0.08 0" radius="0.36" color="#FFFFFF"></a-sphere>
+<a-sphere position="-0.40 0.02 0" radius="0.34" color="#FFFFFF"></a-sphere>
+</a-entity>
+
+<!-- 常設の星 -->
+<a-octahedron
+position="-3.0 3.25 -5.2"
+radius="0.10"
+color="#FFFFFF"
+animation="property: rotation; to: 360 360 0; loop: true; dur: 4200; easing: linear"
+></a-octahedron>
+
+<a-octahedron
+position="3.15 2.85 -5.1"
+radius="0.08"
+color="#FFFFFF"
+animation="property: rotation; to: 0 360 360; loop: true; dur: 3600; easing: linear"
+></a-octahedron>
+
+<a-octahedron
+position="-2.7 1.55 -4.9"
+radius="0.055"
+color="#FFF8C7"
+animation="property: scale; from: 0.7 0.7 0.7; to: 1.35 1.35 1.35; dir: alternate; loop: true; dur: 1200"
+></a-octahedron>
+
+<a-octahedron
+position="2.85 1.85 -5.3"
+radius="0.06"
+color="#FFF8C7"
+animation="property: scale; from: 0.7 0.7 0.7; to: 1.35 1.35 1.35; dir: alternate; loop: true; dur: 1450"
+></a-octahedron>
+
+</a-entity>
+
+<!-- LOVE：ピンク系 -->
+<a-entity id="loveDecoration" visible="true">
+
+<a-torus
+position="-3.3 2.15 -5.2"
+radius="0.18"
+radius-tubular="0.045"
+color="#FF9FBE"
+animation="property: rotation; to: 360 360 0; loop: true; dur: 4200; easing: linear"
+></a-torus>
+
+<a-torus
+position="3.25 2.35 -5.6"
+radius="0.14"
+radius-tubular="0.04"
+color="#FFC0D5"
+animation="property: rotation; to: 360 0 360; loop: true; dur: 3500; easing: linear"
+></a-torus>
+
+<a-octahedron
+position="-2.7 2.65 -4.8"
+radius="0.12"
+color="#FFB2CA"
+animation="property: position; from: -2.7 2.58 -4.8; to: -2.7 2.78 -4.8; dir: alternate; loop: true; dur: 1300"
+></a-octahedron>
+
+<a-octahedron
+position="2.75 1.35 -4.9"
+radius="0.10"
+color="#FFD4E2"
+animation="property: position; from: 2.75 1.28 -4.9; to: 2.75 1.47 -4.9; dir: alternate; loop: true; dur: 1500"
+></a-octahedron>
+
+</a-entity>
+
+<!-- HEALTH：葉っぱ風 -->
+<a-entity id="healthDecoration" visible="false">
+
+<a-sphere
+position="-3.15 2.1 -5.2"
+scale="0.13 0.35 0.08"
+rotation="0 0 -35"
+color="#7FDDB0"
+animation="property: rotation; from: 0 0 -42; to: 0 0 -20; dir: alternate; loop: true; dur: 1600"
+></a-sphere>
+
+<a-sphere
+position="-2.85 2.45 -5.0"
+scale="0.11 0.30 0.07"
+rotation="0 0 35"
+color="#A6E8CA"
+animation="property: rotation; from: 0 0 25; to: 0 0 48; dir: alternate; loop: true; dur: 1800"
+></a-sphere>
+
+<a-sphere
+position="3.15 1.75 -5.3"
+scale="0.13 0.36 0.08"
+rotation="0 0 35"
+color="#75D5A7"
+animation="property: rotation; from: 0 0 28; to: 0 0 48; dir: alternate; loop: true; dur: 1500"
+></a-sphere>
+
+<a-sphere
+position="2.85 2.25 -5.0"
+scale="0.11 0.30 0.07"
+rotation="0 0 -35"
+color="#B7EED5"
+animation="property: rotation; from: 0 0 -48; to: 0 0 -25; dir: alternate; loop: true; dur: 1750"
+></a-sphere>
+
+</a-entity>
+
+<!-- CAMPUS：本＋星 -->
+<a-entity id="campusDecoration" visible="false">
+
+<a-box
+position="-3.15 1.45 -5.0"
+width="0.42"
+height="0.10"
+depth="0.30"
+color="#7FCBE6"
+rotation="0 12 8"
+animation="property: position; from: -3.15 1.40 -5.0; to: -3.15 1.55 -5.0; dir: alternate; loop: true; dur: 1800"
+></a-box>
+
+<a-box
+position="-3.10 1.57 -5.0"
+width="0.38"
+height="0.08"
+depth="0.28"
+color="#FFF1A8"
+rotation="0 12 -5"
+></a-box>
+
+<a-box
+position="3.15 1.55 -5.1"
+width="0.42"
+height="0.10"
+depth="0.30"
+color="#A9DFF0"
+rotation="0 -12 -8"
+animation="property: position; from: 3.15 1.50 -5.1; to: 3.15 1.65 -5.1; dir: alternate; loop: true; dur: 1900"
+></a-box>
+
+<a-box
+position="3.10 1.67 -5.1"
+width="0.38"
+height="0.08"
+depth="0.28"
+color="#FBCBDD"
+rotation="0 -12 5"
+></a-box>
+
+<a-octahedron
+position="-2.85 2.65 -5.15"
+radius="0.09"
+color="#FFE98A"
+animation="property: rotation; to: 0 360 360; loop: true; dur: 2800; easing: linear"
+></a-octahedron>
+
+<a-octahedron
+position="2.85 2.55 -5.15"
+radius="0.09"
+color="#FFE98A"
+animation="property: rotation; to: 360 360 0; loop: true; dur: 3000; easing: linear"
+></a-octahedron>
+
+</a-entity>
+
+<!-- 太陽 -->
+<a-sphere
+position="7 8 -15"
+radius="1.5"
+color="#FFF6A3"
+animation="
+property: rotation;
+to: 0 360 0;
+loop: true;
+dur: 25000;
+easing: linear;
+"
+></a-sphere>
+
+<!-- 地面 -->
+<a-plane
+id="mainGround"
+position="0 0 -5"
+rotation="-90 0 0"
+width="30"
+height="30"
+color="#ECFFFF"
+></a-plane>
+
+<!-- タイトル -->
+<a-text
+value="MBTI Life Fortune"
+align="center"
+position="0 3.25 -4"
+color="#0A7EA8"
+width="8"
+material="emissive: #8BDCF2; emissiveIntensity: 0.12"
+animation__float="
+property: position;
+from: 0 3.25 -4;
+to: 0 3.38 -4;
+dir: alternate;
+loop: true;
+dur: 2500;
+"
+animation__pulse="
+property: scale;
+from: 1 1 1;
+to: 1.025 1.025 1.025;
+dir: alternate;
+loop: true;
+dur: 1800;
+easing: easeInOutSine;
+"
+></a-text>
+
+<!-- 選択中カテゴリ表示 -->
+<a-text
+id="selectedCategoryText"
+value="CATEGORY : LOVE"
+align="center"
+position="0 2.88 -3.95"
+color="#397D96"
+width="4.5"
+></a-text>
+
+<!-- ========================= -->
+<!-- カテゴリボタン -->
+<!-- ========================= -->
+
+<!-- LOVE -->
+<a-box
+class="category-button clickable"
+data-category="love"
+data-label="LOVE"
+position="-1.45 2.5 -3"
+width="1.05"
+height="0.34"
+depth="0.08"
+color="#55CDEA"
+></a-box>
+
+<a-text
+value="LOVE"
+align="center"
+position="-1.45 2.48 -2.94"
+color="#075B76"
+width="2.5"
+></a-text>
+
+<!-- HEALTH -->
+<a-box
+class="category-button clickable"
+data-category="health"
+data-label="HEALTH"
+position="0 2.5 -3"
+width="1.2"
+height="0.34"
+depth="0.08"
+color="#DDF8FF"
+></a-box>
+
+<a-text
+value="HEALTH"
+align="center"
+position="0 2.48 -2.94"
+color="#075B76"
+width="2.5"
+></a-text>
+
+<!-- CAMPUS -->
+<a-box
+class="category-button clickable"
+data-category="campus"
+data-label="CAMPUS"
+position="1.45 2.5 -3"
+width="1.2"
+height="0.34"
+depth="0.08"
+color="#DDF8FF"
+></a-box>
+
+<a-text
+value="CAMPUS"
+align="center"
+position="1.45 2.48 -2.94"
+color="#075B76"
+width="2.5"
+></a-text>
+
+<!-- ========================= -->
+<!-- MBTIボタン 1段目 -->
+<!-- ========================= -->
+
+<a-box
+class="mbti-button clickable"
+data-mbti="INTJ"
+position="-1.8 1.9 -3"
+width="0.75"
+height="0.32"
+depth="0.08"
+color="#AEEFFF"
+></a-box>
+
+<a-text
+value="INTJ"
+align="center"
+position="-1.8 1.88 -2.94"
+color="#005A80"
+width="2"
+></a-text>
+
+<a-box
+class="mbti-button clickable"
+data-mbti="INTP"
+position="-0.6 1.9 -3"
+width="0.75"
+height="0.32"
+depth="0.08"
+color="#AEEFFF"
+></a-box>
+
+<a-text
+value="INTP"
+align="center"
+position="-0.6 1.88 -2.94"
+color="#005A80"
+width="2"
+></a-text>
+
+<a-box
+class="mbti-button clickable"
+data-mbti="ENTJ"
+position="0.6 1.9 -3"
+width="0.75"
+height="0.32"
+depth="0.08"
+color="#AEEFFF"
+></a-box>
+
+<a-text
+value="ENTJ"
+align="center"
+position="0.6 1.88 -2.94"
+color="#005A80"
+width="2"
+></a-text>
+
+<a-box
+class="mbti-button clickable"
+data-mbti="ENTP"
+position="1.8 1.9 -3"
+width="0.75"
+height="0.32"
+depth="0.08"
+color="#AEEFFF"
+></a-box>
+
+<a-text
+value="ENTP"
+align="center"
+position="1.8 1.88 -2.94"
+color="#005A80"
+width="2"
+></a-text>
+
+<!-- ========================= -->
+<!-- MBTIボタン 2段目 -->
+<!-- ========================= -->
+
+<a-box
+class="mbti-button clickable"
+data-mbti="INFJ"
+position="-1.8 1.45 -3"
+width="0.75"
+height="0.32"
+depth="0.08"
+color="#AEEFFF"
+></a-box>
+
+<a-text
+value="INFJ"
+align="center"
+position="-1.8 1.43 -2.94"
+color="#005A80"
+width="2"
+></a-text>
+
+<a-box
+class="mbti-button clickable"
+data-mbti="INFP"
+position="-0.6 1.45 -3"
+width="0.75"
+height="0.32"
+depth="0.08"
+color="#AEEFFF"
+></a-box>
+
+<a-text
+value="INFP"
+align="center"
+position="-0.6 1.43 -2.94"
+color="#005A80"
+width="2"
+></a-text>
+
+<a-box
+class="mbti-button clickable"
+data-mbti="ENFJ"
+position="0.6 1.45 -3"
+width="0.75"
+height="0.32"
+depth="0.08"
+color="#AEEFFF"
+></a-box>
+
+<a-text
+value="ENFJ"
+align="center"
+position="0.6 1.43 -2.94"
+color="#005A80"
+width="2"
+></a-text>
+
+<a-box
+class="mbti-button clickable"
+data-mbti="ENFP"
+position="1.8 1.45 -3"
+width="0.75"
+height="0.32"
+depth="0.08"
+color="#AEEFFF"
+></a-box>
+
+<a-text
+value="ENFP"
+align="center"
+position="1.8 1.43 -2.94"
+color="#005A80"
+width="2"
+></a-text>
+
+<!-- ========================= -->
+<!-- MBTIボタン 3段目 -->
+<!-- ========================= -->
+
+<a-box
+class="mbti-button clickable"
+data-mbti="ISTJ"
+position="-1.8 1 -3"
+width="0.75"
+height="0.32"
+depth="0.08"
+color="#AEEFFF"
+></a-box>
+
+<a-text
+value="ISTJ"
+align="center"
+position="-1.8 0.98 -2.94"
+color="#005A80"
+width="2"
+></a-text>
+
+<a-box
+class="mbti-button clickable"
+data-mbti="ISFJ"
+position="-0.6 1 -3"
+width="0.75"
+height="0.32"
+depth="0.08"
+color="#AEEFFF"
+></a-box>
+
+<a-text
+value="ISFJ"
+align="center"
+position="-0.6 0.98 -2.94"
+color="#005A80"
+width="2"
+></a-text>
+
+<a-box
+class="mbti-button clickable"
+data-mbti="ESTJ"
+position="0.6 1 -3"
+width="0.75"
+height="0.32"
+depth="0.08"
+color="#AEEFFF"
+></a-box>
+
+<a-text
+value="ESTJ"
+align="center"
+position="0.6 0.98 -2.94"
+color="#005A80"
+width="2"
+></a-text>
+
+<a-box
+class="mbti-button clickable"
+data-mbti="ESFJ"
+position="1.8 1 -3"
+width="0.75"
+height="0.32"
+depth="0.08"
+color="#AEEFFF"
+></a-box>
+
+<a-text
+value="ESFJ"
+align="center"
+position="1.8 0.98 -2.94"
+color="#005A80"
+width="2"
+></a-text>
+
+<!-- ========================= -->
+<!-- MBTIボタン 4段目 -->
+<!-- ========================= -->
+
+<a-box
+class="mbti-button clickable"
+data-mbti="ISTP"
+position="-1.8 0.55 -3"
+width="0.75"
+height="0.32"
+depth="0.08"
+color="#AEEFFF"
+></a-box>
+
+<a-text
+value="ISTP"
+align="center"
+position="-1.8 0.53 -2.94"
+color="#005A80"
+width="2"
+></a-text>
+
+<a-box
+class="mbti-button clickable"
+data-mbti="ISFP"
+position="-0.6 0.55 -3"
+width="0.75"
+height="0.32"
+depth="0.08"
+color="#AEEFFF"
+></a-box>
+
+<a-text
+value="ISFP"
+align="center"
+position="-0.6 0.53 -2.94"
+color="#005A80"
+width="2"
+></a-text>
+
+<a-box
+class="mbti-button clickable"
+data-mbti="ESTP"
+position="0.6 0.55 -3"
+width="0.75"
+height="0.32"
+depth="0.08"
+color="#AEEFFF"
+></a-box>
+
+<a-text
+value="ESTP"
+align="center"
+position="0.6 0.53 -2.94"
+color="#005A80"
+width="2"
+></a-text>
+
+<a-box
+class="mbti-button clickable"
+data-mbti="ESFP"
+position="1.8 0.55 -3"
+width="0.75"
+height="0.32"
+depth="0.08"
+color="#AEEFFF"
+></a-box>
+
+<a-text
+value="ESFP"
+align="center"
+position="1.8 0.53 -2.94"
+color="#005A80"
+width="2"
+></a-text>
+
+<!-- ========================= -->
+<!-- 占い中パネル -->
+<!-- ========================= -->
+<a-entity
+id="analyzingPanel"
+visible="false"
+scale="0.01 0.01 0.01"
+>
+
+<a-plane
+position="0 1.65 -2.40"
+width="3.8"
+height="1.45"
+color="#FFFFFF"
+opacity="0.97"
+></a-plane>
+
+<a-text
+value="ANALYZING YOUR FORTUNE..."
+align="center"
+position="0 1.85 -2.34"
+color="#0A7EA8"
+width="4.0"
+></a-text>
+
+<a-text
+value="Please wait a moment"
+align="center"
+position="0 1.47 -2.34"
+color="#72A3B4"
+width="2.7"
+></a-text>
+
+<a-octahedron
+position="-0.55 1.18 -2.32"
+radius="0.07"
+color="#55CDEA"
+animation="property: rotation; to: 360 360 0; loop: true; dur: 900; easing: linear"
+></a-octahedron>
+
+<a-octahedron
+position="0 1.18 -2.32"
+radius="0.07"
+color="#FFC0D5"
+animation="property: rotation; to: 0 360 360; loop: true; dur: 1050; easing: linear"
+></a-octahedron>
+
+<a-octahedron
+position="0.55 1.18 -2.32"
+radius="0.07"
+color="#B4E8CA"
+animation="property: rotation; to: 360 0 360; loop: true; dur: 1200; easing: linear"
+></a-octahedron>
+
+</a-entity>
+
+<!-- ========================= -->
+<!-- 結果画像パネル -->
+<!-- ========================= -->
+
+<a-entity
+id="resultPanel"
+visible="false"
+scale="0.01 0.01 0.01"
+>
+
+<!-- パネル背景 -->
+<a-plane
+position="0 1.65 -2.43"
+width="4.6"
+height="3.25"
+color="#FFFFFF"
+opacity="0.98"
+></a-plane>
+
+<!-- 結果画像：読み込みに成功するまで非表示 -->
+<a-image
+id="resultImage"
+position="0 1.65 -2.38"
+width="4.3"
+height="2.85"
+visible="false"
+color="#FFFFFF"
+material="shader: flat; transparent: true; alphaTest: 0.01"
+></a-image>
+
+<!-- 画像ファイルが見つからないときの表示 -->
+<a-text
+id="imageErrorText"
+value="IMAGE NOT FOUND"
+align="center"
+position="0 1.65 -2.36"
+color="#E54864"
+width="4"
+visible="false"
+></a-text>
+
+<!-- 閉じるボタン -->
+<a-circle
+id="closeButton"
+class="clickable"
+position="2.05 2.98 -2.32"
+radius="0.22"
+color="#FF9FAF"
+></a-circle>
+
+<a-text
+value="X"
+align="center"
+position="2.05 2.94 -2.27"
+color="#FFFFFF"
+width="2"
+></a-text>
+
+</a-entity>
+
+<!-- ========================= -->
+<!-- 結果表示時のキラキラ -->
+<!-- ========================= -->
+<a-entity id="resultSparkles">
+
+<a-octahedron
+class="burst-spark"
+position="0 1.65 -2.20"
+radius="0.07"
+color="#FFD6E4"
+animation__burst="property: position; from: 0 1.65 -2.20; to: -2.1 2.8 -2.15; startEvents: burst; dur: 650; easing: easeOutQuad"
+animation__size="property: scale; from: 0.01 0.01 0.01; to: 1.3 1.3 1.3; startEvents: burst; dur: 500; easing: easeOutBack"
+></a-octahedron>
+
+<a-octahedron
+class="burst-spark"
+position="0 1.65 -2.20"
+radius="0.06"
+color="#FFF09A"
+animation__burst="property: position; from: 0 1.65 -2.20; to: 2.0 2.7 -2.15; startEvents: burst; dur: 700; easing: easeOutQuad"
+animation__size="property: scale; from: 0.01 0.01 0.01; to: 1.2 1.2 1.2; startEvents: burst; dur: 520; easing: easeOutBack"
+></a-octahedron>
+
+<a-octahedron
+class="burst-spark"
+position="0 1.65 -2.20"
+radius="0.055"
+color="#BDEFFF"
+animation__burst="property: position; from: 0 1.65 -2.20; to: -2.3 1.1 -2.15; startEvents: burst; dur: 720; easing: easeOutQuad"
+animation__size="property: scale; from: 0.01 0.01 0.01; to: 1.2 1.2 1.2; startEvents: burst; dur: 500; easing: easeOutBack"
+></a-octahedron>
+
+<a-octahedron
+class="burst-spark"
+position="0 1.65 -2.20"
+radius="0.055"
+color="#BCEBCF"
+animation__burst="property: position; from: 0 1.65 -2.20; to: 2.25 1.0 -2.15; startEvents: burst; dur: 760; easing: easeOutQuad"
+animation__size="property: scale; from: 0.01 0.01 0.01; to: 1.25 1.25 1.25; startEvents: burst; dur: 540; easing: easeOutBack"
+></a-octahedron>
+
+<a-sphere
+class="burst-spark"
+position="0 1.65 -2.20"
+radius="0.045"
+color="#FFFFFF"
+animation__burst="property: position; from: 0 1.65 -2.20; to: -1.2 3.0 -2.15; startEvents: burst; dur: 650; easing: easeOutQuad"
+animation__size="property: scale; from: 0.01 0.01 0.01; to: 1.5 1.5 1.5; startEvents: burst; dur: 520; easing: easeOutBack"
+></a-sphere>
+
+<a-sphere
+class="burst-spark"
+position="0 1.65 -2.20"
+radius="0.045"
+color="#FFFFFF"
+animation__burst="property: position; from: 0 1.65 -2.20; to: 1.3 3.0 -2.15; startEvents: burst; dur: 680; easing: easeOutQuad"
+animation__size="property: scale; from: 0.01 0.01 0.01; to: 1.5 1.5 1.5; startEvents: burst; dur: 520; easing: easeOutBack"
+></a-sphere>
+
+</a-entity>
+
+<!-- ========================= -->
+<!-- 雲 -->
+<!-- ========================= -->
+
+<a-entity position="-6 5 -12">
+<a-sphere radius="1.3" color="white"></a-sphere>
+<a-sphere position="0.8 0.2 0" radius="1.1" color="white"></a-sphere>
+<a-sphere position="-0.8 0.2 0" radius="1.1" color="white"></a-sphere>
+<a-sphere position="0 0.6 0" radius="0.9" color="white"></a-sphere>
+</a-entity>
+
+<a-entity position="5 6 -10">
+<a-sphere radius="1.4" color="white"></a-sphere>
+<a-sphere position="0.8 0.2 0" radius="1.2" color="white"></a-sphere>
+<a-sphere position="-0.8 0.2 0" radius="1.2" color="white"></a-sphere>
+<a-sphere position="0 0.7 0" radius="1" color="white"></a-sphere>
+</a-entity>
+
+<!-- キラキラ -->
+<a-sphere
+radius="0.05"
+color="white"
+position="-2 2 -5"
+animation="
+property: position;
+to: -2 2.4 -5;
+loop: true;
+dir: alternate;
+dur: 1200;
+"
+></a-sphere>
+
+<a-sphere
+radius="0.05"
+color="white"
+position="2 3 -6"
+animation="
+property: position;
+to: 2 3.5 -6;
+loop: true;
+dir: alternate;
+dur: 1600;
+"
+></a-sphere>
+
+<a-sphere
+radius="0.04"
+color="white"
+position="0 4 -8"
+animation="
+property: position;
+to: 0 4.5 -8;
+loop: true;
+dir: alternate;
+dur: 1800;
+"
+></a-sphere>
+
+<!-- ライト -->
+<a-light
+type="ambient"
+color="#FFFFFF"
+intensity="1"
+></a-light>
+
+<a-light
+type="directional"
+position="2 6 1"
+intensity="0.8"
+></a-light>
+
+<!-- カメラ -->
+<a-entity position="0 1.6 3">
+
+<a-camera
+look-controls="true"
+wasd-controls="true"
+></a-camera>
+
+<!--
+黒い丸の原因だった
+<a-cursor></a-cursor>
+は削除しています。
+-->
+
+</a-entity>
+
+<!-- VRコントローラー -->
+<a-entity
+laser-controls="hand: right"
+raycaster="objects: .clickable"
+line="color: #45C6E8; opacity: 0.8"
+></a-entity>
+
+<a-entity
+laser-controls="hand: left"
+raycaster="objects: .clickable"
+line="color: #45C6E8; opacity: 0.8"
+></a-entity>
+
+</a-scene>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+let selectedCategory = "love";
+
+const categoryButtons =
+document.querySelectorAll(".category-button");
+
+const mbtiButtons =
+document.querySelectorAll(".mbti-button");
+
+const selectedCategoryText =
+document.querySelector("#selectedCategoryText");
+
+const resultPanel =
+document.querySelector("#resultPanel");
+
+const resultImage =
+document.querySelector("#resultImage");
+
+const closeButton =
+document.querySelector("#closeButton");
+
+const imageErrorText =
+document.querySelector("#imageErrorText");
+
+const startPanel =
+document.querySelector("#startPanel");
+
+const startButton =
+document.querySelector("#startButton");
+
+const musicControl =
+document.querySelector("#musicControl");
+
+const musicButton =
+document.querySelector("#musicButton");
+
+const musicButtonText =
+document.querySelector("#musicButtonText");
+
+const musicMenu =
+document.querySelector("#musicMenu");
+
+const musicMenuClose =
+document.querySelector("#musicMenuClose");
+
+const musicPowerButton =
+document.querySelector("#musicPowerButton");
+
+const musicPowerText =
+document.querySelector("#musicPowerText");
+
+const musicModeButtons =
+document.querySelectorAll(".music-mode-button");
+
+const currentMusicText =
+document.querySelector("#currentMusicText");
+
+const volumeDownButton =
+document.querySelector("#volumeDownButton");
+
+const volumeUpButton =
+document.querySelector("#volumeUpButton");
+
+const volumeText =
+document.querySelector("#volumeText");
+
+const musicToast =
+document.querySelector("#musicToast");
+
+const musicToastText =
+document.querySelector("#musicToastText");
+
+const mainSky =
+document.querySelector("#mainSky");
+
+const mainGround =
+document.querySelector("#mainGround");
+
+const loveDecoration =
+document.querySelector("#loveDecoration");
+
+const healthDecoration =
+document.querySelector("#healthDecoration");
+
+const campusDecoration =
+document.querySelector("#campusDecoration");
+
+const analyzingPanel =
+document.querySelector("#analyzingPanel");
+
+const resultSparkles =
+document.querySelector("#resultSparkles");
+
+const lovePattern =
+document.querySelector("#lovePattern");
+
+const healthPattern =
+document.querySelector("#healthPattern");
+
+const campusPattern =
+document.querySelector("#campusPattern");
+
+const haloOuter =
+document.querySelector("#haloOuter");
+
+const haloMiddle =
+document.querySelector("#haloMiddle");
+
+const haloInner =
+document.querySelector("#haloInner");
+
+const moonCore =
+document.querySelector("#moonCore");
+
+const moonHalo1 =
+document.querySelector("#moonHalo1");
+
+const moonHalo2 =
+document.querySelector("#moonHalo2");
+
+const leftLightArch =
+document.querySelector("#leftLightArch");
+
+const rightLightArch =
+document.querySelector("#rightLightArch");
+
+const farGlowA =
+document.querySelector("#farGlowA");
+
+const farGlowB =
+document.querySelector("#farGlowB");
+
+const farGlowC =
+document.querySelector("#farGlowC");
+
+
+
+
+/*
+* ==========================================
+* ULTIMATE 背景テーマ
+* ==========================================
+*/
+function setUltimateBackgroundTheme(
+category
+) {
+
+const scene =
+document.querySelector("a-scene");
+
+if (
+category === "love"
+) {
+
+moonCore.setAttribute(
+"color",
+"#FFF0F6"
+);
+
+moonHalo1.setAttribute(
+"color",
+"#FFD1E2"
+);
+
+moonHalo2.setAttribute(
+"color",
+"#E8D9FF"
+);
+
+leftLightArch
+.querySelectorAll("a-torus")
+.forEach(
+function (item, index) {
+item.setAttribute(
+"color",
+index === 0 ?
+"#FFD1E2" :
+"#E7D8FF"
+);
+}
+);
+
+rightLightArch
+.querySelectorAll("a-torus")
+.forEach(
+function (item, index) {
+item.setAttribute(
+"color",
+index === 0 ?
+"#FFD1E2" :
+"#E7D8FF"
+);
+}
+);
+
+farGlowA.setAttribute(
+"color",
+"#F4CCE1"
+);
+
+farGlowB.setAttribute(
+"color",
+"#E2D9FF"
+);
+
+farGlowC.setAttribute(
+"color",
+"#DDF6FF"
+);
+
+scene.setAttribute(
+"fog",
+"type: exponential; color: #FBEAF4; density: 0.012"
+);
+
+} else if (
+category === "health"
+) {
+
+moonCore.setAttribute(
+"color",
+"#F3FFF9"
+);
+
+moonHalo1.setAttribute(
+"color",
+"#BDEDD7"
+);
+
+moonHalo2.setAttribute(
+"color",
+"#D9F8EF"
+);
+
+leftLightArch
+.querySelectorAll("a-torus")
+.forEach(
+function (item, index) {
+item.setAttribute(
+"color",
+index === 0 ?
+"#BDEDD7" :
+"#D8F7EB"
+);
+}
+);
+
+rightLightArch
+.querySelectorAll("a-torus")
+.forEach(
+function (item, index) {
+item.setAttribute(
+"color",
+index === 0 ?
+"#BDEDD7" :
+"#D8F7EB"
+);
+}
+);
+
+farGlowA.setAttribute(
+"color",
+"#DDF7E9"
+);
+
+farGlowB.setAttribute(
+"color",
+"#D8F6FF"
+);
+
+farGlowC.setAttribute(
+"color",
+"#C8F2DD"
+);
+
+scene.setAttribute(
+"fog",
+"type: exponential; color: #EAFBF3; density: 0.012"
+);
+
+} else {
+
+moonCore.setAttribute(
+"color",
+"#F8FDFF"
+);
+
+moonHalo1.setAttribute(
+"color",
+"#BFEAFF"
+);
+
+moonHalo2.setAttribute(
+"color",
+"#D7E9FF"
+);
+
+leftLightArch
+.querySelectorAll("a-torus")
+.forEach(
+function (item, index) {
+item.setAttribute(
+"color",
+index === 0 ?
+"#BFEAFF" :
+"#D8E9FF"
+);
+}
+);
+
+rightLightArch
+.querySelectorAll("a-torus")
+.forEach(
+function (item, index) {
+item.setAttribute(
+"color",
+index === 0 ?
+"#BFEAFF" :
+"#D8E9FF"
+);
+}
+);
+
+farGlowA.setAttribute(
+"color",
+"#D9ECFF"
+);
+
+farGlowB.setAttribute(
+"color",
+"#CFEFFF"
+);
+
+farGlowC.setAttribute(
+"color",
+"#E6E1FF"
+);
+
+scene.setAttribute(
+"fog",
+"type: exponential; color: #EAF6FF; density: 0.012"
+);
+
+}
+
+}
+
+/*
+* ==========================================
+* DELUXE 背景柄を生成
+* ==========================================
+*/
+
+function setTransparentMaterial(
+element,
+opacity,
+emissiveColor
+) {
+
+element.setAttribute(
+"material",
+"transparent: true; opacity: " +
+opacity +
+"; emissive: " +
+emissiveColor +
+"; emissiveIntensity: 0.12"
+);
+
+}
+
+/*
+* LOVE
+* リング・宝石・ドットを背景に散らす
+*/
+const lovePositions = [
+[-5.0, 4.4, -8.0],
+[-4.2, 3.1, -8.2],
+[-5.2, 1.7, -8.1],
+[-4.5, 0.35, -8.0],
+[-3.4, 4.7, -8.4],
+[-2.6, 3.65, -8.2],
+[-1.5, 4.55, -8.1],
+[1.4, 4.6, -8.1],
+[2.6, 3.7, -8.2],
+[3.6, 4.65, -8.3],
+[4.45, 3.15, -8.1],
+[5.15, 1.8, -8.2],
+[4.55, 0.4, -8.0],
+[-3.75, 0.85, -8.3],
+[3.8, 0.9, -8.3]
+];
+
+lovePositions.forEach(
+function (pos, index) {
+
+let element;
+
+if (index % 3 === 0) {
+
+element =
+document.createElement("a-torus");
+
+element.setAttribute(
+"radius",
+0.18 + ((index % 4) * 0.025)
+);
+
+element.setAttribute(
+"radius-tubular",
+0.028
+);
+
+element.setAttribute(
+"color",
+index % 2 === 0 ?
+"#FFAAC7" :
+"#FFD5E3"
+);
+
+} else {
+
+element =
+document.createElement("a-octahedron");
+
+element.setAttribute(
+"radius",
+0.07 + ((index % 4) * 0.012)
+);
+
+element.setAttribute(
+"color",
+index % 2 === 0 ?
+"#FFC0D5" :
+"#FFF0F6"
+);
+
+}
+
+element.setAttribute(
+"position",
+pos.join(" ")
+);
+
+setTransparentMaterial(
+element,
+0.68,
+element.getAttribute("color")
+);
+
+element.setAttribute(
+"animation__float",
+"property: position; from: " +
+pos[0] + " " +
+(pos[1] - 0.08) + " " +
+pos[2] +
+"; to: " +
+pos[0] + " " +
+(pos[1] + 0.10) + " " +
+pos[2] +
+"; dir: alternate; loop: true; dur: " +
+(1800 + index * 90) +
+"; easing: easeInOutSine"
+);
+
+element.setAttribute(
+"animation__spin",
+"property: rotation; to: 0 360 360; loop: true; dur: " +
+(6500 + index * 230) +
+"; easing: linear"
+);
+
+lovePattern.appendChild(element);
+
+}
+);
+
+/*
+* HEALTH
+* 葉っぱ・泡・小さなリング
+*/
+const healthPositions = [
+[-5.0, 4.2, -8.1],
+[-4.35, 3.0, -8.2],
+[-5.05, 1.6, -8.0],
+[-4.45, 0.45, -8.2],
+[-3.3, 4.6, -8.4],
+[-2.5, 3.7, -8.1],
+[-1.4, 4.5, -8.2],
+[1.45, 4.55, -8.2],
+[2.55, 3.65, -8.1],
+[3.35, 4.55, -8.3],
+[4.4, 3.0, -8.2],
+[5.05, 1.55, -8.0],
+[4.5, 0.45, -8.1],
+[-3.7, 0.95, -8.3],
+[3.75, 0.9, -8.3]
+];
+
+healthPositions.forEach(
+function (pos, index) {
+
+let element;
+
+if (index % 3 === 0) {
+
+element =
+document.createElement("a-torus");
+
+element.setAttribute(
+"radius",
+0.14 + ((index % 4) * 0.02)
+);
+
+element.setAttribute(
+"radius-tubular",
+0.022
+);
+
+element.setAttribute(
+"color",
+"#9CE5C3"
+);
+
+} else {
+
+element =
+document.createElement("a-sphere");
+
+element.setAttribute(
+"radius",
+0.12
+);
+
+element.setAttribute(
+"scale",
+index % 2 === 0 ?
+"0.55 1.45 0.38" :
+"0.45 1.25 0.35"
+);
+
+element.setAttribute(
+"rotation",
+"0 0 " +
+(index % 2 === 0 ? -35 : 35)
+);
+
+element.setAttribute(
+"color",
+index % 2 === 0 ?
+"#7DD9AC" :
+"#C3F1DA"
+);
+
+}
+
+element.setAttribute(
+"position",
+pos.join(" ")
+);
+
+setTransparentMaterial(
+element,
+0.64,
+element.getAttribute("color")
+);
+
+element.setAttribute(
+"animation__float",
+"property: position; from: " +
+pos[0] + " " +
+(pos[1] - 0.07) + " " +
+pos[2] +
+"; to: " +
+pos[0] + " " +
+(pos[1] + 0.11) + " " +
+pos[2] +
+"; dir: alternate; loop: true; dur: " +
+(1900 + index * 105) +
+"; easing: easeInOutSine"
+);
+
+healthPattern.appendChild(element);
+
+}
+);
+
+/*
+* CAMPUS
+* 背景グリッド
+*/
+for (
+let x = -5;
+x <= 5;
+x += 1
+) {
+
+const line =
+document.createElement("a-box");
+
+line.setAttribute(
+"position",
+x + " 2.25 -8.35"
+);
+
+line.setAttribute(
+"width",
+"0.018"
+);
+
+line.setAttribute(
+"height",
+"5.2"
+);
+
+line.setAttribute(
+"depth",
+"0.015"
+);
+
+line.setAttribute(
+"color",
+"#A9DFF0"
+);
+
+setTransparentMaterial(
+line,
+0.24,
+"#A9DFF0"
+);
+
+campusPattern.appendChild(line);
+
+}
+
+for (
+let y = 0;
+y <= 4.8;
+y += 0.8
+) {
+
+const line =
+document.createElement("a-box");
+
+line.setAttribute(
+"position",
+"0 " + y + " -8.34"
+);
+
+line.setAttribute(
+"width",
+"10.2"
+);
+
+line.setAttribute(
+"height",
+"0.018"
+);
+
+line.setAttribute(
+"depth",
+"0.015"
+);
+
+line.setAttribute(
+"color",
+"#A9DFF0"
+);
+
+setTransparentMaterial(
+line,
+0.22,
+"#A9DFF0"
+);
+
+campusPattern.appendChild(line);
+
+}
+
+/*
+* CAMPUSの星とドット
+*/
+const campusStars = [
+[-4.6, 4.35, -8.0],
+[-3.55, 3.45, -8.1],
+[-4.7, 1.1, -8.0],
+[-2.8, 4.6, -8.2],
+[-1.5, 4.35, -8.0],
+[1.4, 4.45, -8.0],
+[2.8, 4.65, -8.2],
+[3.6, 3.45, -8.1],
+[4.65, 4.25, -8.0],
+[4.75, 1.1, -8.0]
+];
+
+campusStars.forEach(
+function (pos, index) {
+
+const star =
+document.createElement("a-octahedron");
+
+star.setAttribute(
+"position",
+pos.join(" ")
+);
+
+star.setAttribute(
+"radius",
+0.065 + ((index % 3) * 0.012)
+);
+
+star.setAttribute(
+"color",
+index % 2 === 0 ?
+"#FFE98A" :
+"#D7F4FF"
+);
+
+setTransparentMaterial(
+star,
+0.75,
+star.getAttribute("color")
+);
+
+star.setAttribute(
+"animation__spin",
+"property: rotation; to: 360 360 0; loop: true; dur: " +
+(4200 + index * 260) +
+"; easing: linear"
+);
+
+campusPattern.appendChild(star);
+
+}
+);
+
+/*
+* ==========================================
+* MBTIカードの立体感・ふわふわ演出
+* ==========================================
+*/
+mbtiButtons.forEach(function (button, index) {
+
+button.setAttribute(
+"material",
+"shader: standard; metalness: 0.04; roughness: 0.38"
+);
+
+button.setAttribute(
+"shadow",
+"cast: true; receive: true"
+);
+
+const p =
+button.getAttribute("position");
+
+if (p && typeof p.x === "number") {
+
+const floatHeight =
+0.025 + ((index % 4) * 0.006);
+
+const floatDuration =
+1700 + ((index % 5) * 130);
+
+button.setAttribute(
+"animation__float",
+"property: position; from: " +
+p.x + " " + p.y + " " + p.z +
+"; to: " +
+p.x + " " + (p.y + floatHeight) + " " + p.z +
+"; dir: alternate; loop: true; dur: " +
+floatDuration +
+"; easing: easeInOutSine"
+);
+
+}
+
+});
+
+
+
+/*
+* ==========================================
+* 音機能
+* 4種類のBGM + AUTO + 音量調整
+* 外部音源なし / Web Audio API
+* ==========================================
+*/
+let audioContext = null;
+let bgmTimer = null;
+let bgmEnabled = true;
+let nextNoteTime = 0;
+let noteIndex = 0;
+
+let selectedMusicMode = "AUTO";
+let bgmVolume = 0.60;
+
+const musicPresets = {
+
+DREAMY: {
+notes: [
+261.63,
+329.63,
+392.00,
+493.88,
+440.00,
+392.00,
+329.63,
+293.66
+],
+wave: "sine",
+interval: 0.54,
+duration: 0.90,
+gain: 0.034,
+harmonic: 2,
+harmonicGain: 0.18
+},
+
+CHILL: {
+notes: [
+220.00,
+261.63,
+329.63,
+392.00,
+329.63,
+293.66,
+261.63,
+246.94
+],
+wave: "triangle",
+interval: 0.72,
+duration: 1.05,
+gain: 0.030,
+harmonic: 1.5,
+harmonicGain: 0.10
+},
+
+SPARKLE: {
+notes: [
+523.25,
+659.25,
+783.99,
+1046.50,
+880.00,
+783.99,
+659.25,
+587.33
+],
+wave: "sine",
+interval: 0.36,
+duration: 0.42,
+gain: 0.027,
+harmonic: 2,
+harmonicGain: 0.22
+},
+
+LOFI: {
+notes: [
+196.00,
+261.63,
+220.00,
+164.81,
+174.61,
+261.63,
+196.00,
+146.83
+],
+wave: "triangle",
+interval: 0.62,
+duration: 0.62,
+gain: 0.032,
+harmonic: 2,
+harmonicGain: 0.07
+}
+
+};
+
+function ensureAudioContext() {
+
+if (!audioContext) {
+
+const AudioContextClass =
+window.AudioContext ||
+window.webkitAudioContext;
+
+audioContext =
+new AudioContextClass();
+
+}
+
+if (
+audioContext.state ===
+"suspended"
+) {
+
+audioContext.resume();
+
+}
+
+}
+
+function getAutoMusicMode() {
+
+if (
+selectedCategory ===
+"love"
+) {
+
+return "SPARKLE";
+
+}
+
+if (
+selectedCategory ===
+"health"
+) {
+
+return "CHILL";
+
+}
+
+return "LOFI";
+
+}
+
+function getActiveMusicMode() {
+
+if (
+selectedMusicMode ===
+"AUTO"
+) {
+
+return getAutoMusicMode();
+
+}
+
+return selectedMusicMode;
+
+}
+
+function getActivePreset() {
+
+return musicPresets[
+getActiveMusicMode()
+];
+
+}
+
+function updateMusicDisplay() {
+
+const activeMode =
+getActiveMusicMode();
+
+if (
+selectedMusicMode ===
+"AUTO"
+) {
+
+currentMusicText.setAttribute(
+"value",
+"AUTO  >  " + activeMode
+);
+
+} else {
+
+currentMusicText.setAttribute(
+"value",
+selectedMusicMode
+);
+
+}
+
+volumeText.setAttribute(
+"value",
+"VOL " +
+Math.round(
+bgmVolume * 100
+) +
+"%"
+);
+
+musicPowerText.setAttribute(
+"value",
+bgmEnabled ?
+"BGM : ON" :
+"BGM : OFF"
+);
+
+musicPowerButton.setAttribute(
+"color",
+bgmEnabled ?
+"#8DDFEF" :
+"#E2E8EA"
+);
+
+musicModeButtons.forEach(
+function (button) {
+
+const mode =
+button.getAttribute(
+"data-music-mode"
+);
+
+if (
+mode ===
+selectedMusicMode
+) {
+
+button.setAttribute(
+"color",
+"#55CDEA"
+);
+
+} else {
+
+button.setAttribute(
+"color",
+"#DFF5FF"
+);
+
+}
+
+}
+);
+
+}
+
+function showMusicToast(
+message
+) {
+
+musicToastText.setAttribute(
+"value",
+message
+);
+
+musicToast.removeAttribute(
+"animation__show"
+);
+
+musicToast.removeAttribute(
+"animation__hide"
+);
+
+musicToast.setAttribute(
+"scale",
+"0.01 0.01 0.01"
+);
+
+musicToast.setAttribute(
+"visible",
+true
+);
+
+musicToast.setAttribute(
+"animation__show",
+"property: scale; from: 0.01 0.01 0.01; to: 1 1 1; dur: 230; easing: easeOutBack"
+);
+
+setTimeout(
+function () {
+
+musicToast.setAttribute(
+"animation__hide",
+"property: scale; to: 0.01 0.01 0.01; dur: 230; easing: easeInCubic"
+);
+
+},
+1100
+);
+
+setTimeout(
+function () {
+
+musicToast.setAttribute(
+"visible",
+false
+);
+
+},
+1350
+);
+
+}
+
+function playBgmTone(
+frequency,
+startTime,
+duration,
+preset
+) {
+
+if (
+!audioContext ||
+!bgmEnabled
+) {
+
+return;
+
+}
+
+/*
+* メイン音
+*/
+const oscillator =
+audioContext.createOscillator();
+
+const gain =
+audioContext.createGain();
+
+oscillator.type =
+preset.wave;
+
+oscillator.frequency.setValueAtTime(
+frequency,
+startTime
+);
+
+const peak =
+Math.max(
+0.0002,
+preset.gain *
+bgmVolume
+);
+
+gain.gain.setValueAtTime(
+0.0001,
+startTime
+);
+
+gain.gain.exponentialRampToValueAtTime(
+peak,
+startTime + 0.045
+);
+
+gain.gain.exponentialRampToValueAtTime(
+0.0001,
+startTime + duration
+);
+
+oscillator.connect(
+gain
+);
+
+gain.connect(
+audioContext.destination
+);
+
+oscillator.start(
+startTime
+);
+
+oscillator.stop(
+startTime +
+duration +
+0.05
+);
+
+/*
+* 小さな倍音を重ねて
+* モードごとの質感を出す
+*/
+if (
+preset.harmonicGain >
+0
+) {
+
+const harmonic =
+audioContext.createOscillator();
+
+const harmonicGain =
+audioContext.createGain();
+
+harmonic.type =
+"sine";
+
+harmonic.frequency.setValueAtTime(
+frequency *
+preset.harmonic,
+startTime
+);
+
+const harmonicPeak =
+Math.max(
+0.00015,
+peak *
+preset.harmonicGain
+);
+
+harmonicGain.gain.setValueAtTime(
+0.0001,
+startTime
+);
+
+harmonicGain.gain.exponentialRampToValueAtTime(
+harmonicPeak,
+startTime + 0.04
+);
+
+harmonicGain.gain.exponentialRampToValueAtTime(
+0.0001,
+startTime + duration * 0.72
+);
+
+harmonic.connect(
+harmonicGain
+);
+
+harmonicGain.connect(
+audioContext.destination
+);
+
+harmonic.start(
+startTime
+);
+
+harmonic.stop(
+startTime +
+duration +
+0.04
+);
+
+}
+
+}
+
+function scheduleBgm() {
+
+if (
+!audioContext ||
+!bgmEnabled
+) {
+
+return;
+
+}
+
+const preset =
+getActivePreset();
+
+while (
+nextNoteTime <
+audioContext.currentTime +
+0.40
+) {
+
+const frequency =
+preset.notes[
+noteIndex %
+preset.notes.length
+];
+
+playBgmTone(
+frequency,
+nextNoteTime,
+preset.duration,
+preset
+);
+
+nextNoteTime +=
+preset.interval;
+
+noteIndex++;
+
+}
+
+}
+
+function restartBgm(
+showToast = false
+) {
+
+if (
+!bgmEnabled
+) {
+
+updateMusicDisplay();
+return;
+
+}
+
+ensureAudioContext();
+
+if (
+bgmTimer
+) {
+
+clearInterval(
+bgmTimer
+);
+
+bgmTimer = null;
+
+}
+
+noteIndex = 0;
+
+nextNoteTime =
+audioContext.currentTime +
+0.05;
+
+scheduleBgm();
+
+bgmTimer =
+setInterval(
+scheduleBgm,
+140
+);
+
+updateMusicDisplay();
+
+if (
+showToast
+) {
+
+showMusicToast(
+getActiveMusicMode() +
+" MODE"
+);
+
+}
+
+}
+
+function startBgm() {
+
+ensureAudioContext();
+
+bgmEnabled = true;
+
+restartBgm(
+false
+);
+
+}
+
+function stopBgm() {
+
+bgmEnabled = false;
+
+if (
+bgmTimer
+) {
+
+clearInterval(
+bgmTimer
+);
+
+bgmTimer = null;
+
+}
+
+updateMusicDisplay();
+
+}
+
+function setMusicMode(
+mode
+) {
+
+selectedMusicMode =
+mode;
+
+updateMusicDisplay();
+
+if (
+bgmEnabled
+) {
+
+restartBgm(
+true
+);
+
+} else {
+
+const label =
+mode === "AUTO" ?
+"AUTO > " +
+getActiveMusicMode() :
+mode;
+
+showMusicToast(
+label +
+" SELECTED"
+);
+
+}
+
+}
+
+function changeVolume(
+amount
+) {
+
+bgmVolume =
+Math.min(
+1.0,
+Math.max(
+0.20,
+bgmVolume +
+amount
+)
+);
+
+bgmVolume =
+Math.round(
+bgmVolume * 10
+) / 10;
+
+updateMusicDisplay();
+
+showMusicToast(
+"VOLUME " +
+Math.round(
+bgmVolume * 100
+) +
+"%"
+);
+
+}
+
+function playClickSound() {
+
+ensureAudioContext();
+
+const now =
+audioContext.currentTime;
+
+const oscillator =
+audioContext.createOscillator();
+
+const gain =
+audioContext.createGain();
+
+oscillator.type =
+"sine";
+
+oscillator.frequency.setValueAtTime(
+660,
+now
+);
+
+oscillator.frequency.exponentialRampToValueAtTime(
+880,
+now + 0.08
+);
+
+gain.gain.setValueAtTime(
+0.0001,
+now
+);
+
+gain.gain.exponentialRampToValueAtTime(
+0.07,
+now + 0.01
+);
+
+gain.gain.exponentialRampToValueAtTime(
+0.0001,
+now + 0.12
+);
+
+oscillator.connect(
+gain
+);
+
+gain.connect(
+audioContext.destination
+);
+
+oscillator.start(
+now
+);
+
+oscillator.stop(
+now + 0.13
+);
+
+}
+
+function playResultSound() {
+
+ensureAudioContext();
+
+const now =
+audioContext.currentTime;
+
+[
+784,
+988,
+1175
+].forEach(
+function (
+frequency,
+index
+) {
+
+const oscillator =
+audioContext.createOscillator();
+
+const gain =
+audioContext.createGain();
+
+const start =
+now +
+(index * 0.07);
+
+oscillator.type =
+"sine";
+
+oscillator.frequency.setValueAtTime(
+frequency,
+start
+);
+
+gain.gain.setValueAtTime(
+0.0001,
+start
+);
+
+gain.gain.exponentialRampToValueAtTime(
+0.05,
+start + 0.01
+);
+
+gain.gain.exponentialRampToValueAtTime(
+0.0001,
+start + 0.22
+);
+
+oscillator.connect(
+gain
+);
+
+gain.connect(
+audioContext.destination
+);
+
+oscillator.start(
+start
+);
+
+oscillator.stop(
+start + 0.24
+);
+
+}
+);
+
+}
+
+/*
+* MUSIC MENUを開く
+*/
+function openMusicMenu() {
+
+musicMenu.removeAttribute(
+"animation__open"
+);
+
+musicMenu.setAttribute(
+"scale",
+"0.01 0.01 0.01"
+);
+
+musicMenu.setAttribute(
+"visible",
+true
+);
+
+musicMenu.setAttribute(
+"animation__open",
+"property: scale; from: 0.01 0.01 0.01; to: 1 1 1; dur: 300; easing: easeOutBack"
+);
+
+updateMusicDisplay();
+
+}
+
+/*
+* MUSIC MENUを閉じる
+*/
+function closeMusicMenu() {
+
+musicMenu.setAttribute(
+"animation__close",
+"property: scale; to: 0.01 0.01 0.01; dur: 220; easing: easeInCubic"
+);
+
+setTimeout(
+function () {
+
+musicMenu.setAttribute(
+"visible",
+false
+);
+
+musicMenu.removeAttribute(
+"animation__close"
+);
+
+},
+230
+);
+
+}
+
+/*
+* 初期背景はLOVE
+*/
+setUltimateBackgroundTheme(
+"love"
+);
+
+/*
+* STARTボタン
+*/
+startButton.addEventListener(
+"click",
+function () {
+
+playClickSound();
+
+selectedMusicMode =
+"AUTO";
+
+bgmVolume =
+0.60;
+
+updateMusicDisplay();
+startBgm();
+
+startPanel.setAttribute(
+"animation__startout",
+"property: scale; to: 0.01 0.01 0.01; dur: 350; easing: easeInCubic"
+);
+
+setTimeout(
+function () {
+
+startPanel.setAttribute(
+"visible",
+false
+);
+
+musicControl.setAttribute(
+"visible",
+true
+);
+},
+360
+);
+}
+);
+
+/*
+* ==========================================
+* MUSIC MENU 操作
+* ==========================================
+*/
+
+/*
+* 上部のMUSIC MENUボタン
+*/
+musicButton.addEventListener(
+"click",
+function () {
+
+playClickSound();
+openMusicMenu();
+
+}
+);
+
+musicButton.addEventListener(
+"mouseenter",
+function () {
+
+musicButton.setAttribute(
+"scale",
+"1.08 1.08 1.08"
+);
+
+}
+);
+
+musicButton.addEventListener(
+"mouseleave",
+function () {
+
+musicButton.setAttribute(
+"scale",
+"1 1 1"
+);
+
+}
+);
+
+/*
+* MENUを閉じる
+*/
+musicMenuClose.addEventListener(
+"click",
+function () {
+
+playClickSound();
+closeMusicMenu();
+
+}
+);
+
+/*
+* BGM ON / OFF
+*/
+musicPowerButton.addEventListener(
+"click",
+function () {
+
+playClickSound();
+
+if (
+bgmEnabled
+) {
+
+stopBgm();
+
+showMusicToast(
+"BGM OFF"
+);
+
+} else {
+
+startBgm();
+
+showMusicToast(
+getActiveMusicMode() +
+" MODE"
+);
+
+}
+
+}
+);
+
+/*
+* BGMモード選択
+*/
+musicModeButtons.forEach(
+function (button) {
+
+button.addEventListener(
+"click",
+function () {
+
+playClickSound();
+
+const mode =
+button.getAttribute(
+"data-music-mode"
+);
+
+setMusicMode(
+mode
+);
+
+}
+);
+
+button.addEventListener(
+"mouseenter",
+function () {
+
+button.setAttribute(
+"scale",
+"1.06 1.06 1.06"
+);
+
+}
+);
+
+button.addEventListener(
+"mouseleave",
+function () {
+
+button.setAttribute(
+"scale",
+"1 1 1"
+);
+
+}
+);
+
+}
+);
+
+/*
+* 音量 -
+*/
+volumeDownButton.addEventListener(
+"click",
+function () {
+
+playClickSound();
+
+changeVolume(
+-0.20
+);
+
+}
+);
+
+/*
+* 音量 +
+*/
+volumeUpButton.addEventListener(
+"click",
+function () {
+
+playClickSound();
+
+changeVolume(
+0.20
+);
+
+}
+);
+
+/*
+* 音量ボタンのホバー
+*/
+[
+volumeDownButton,
+volumeUpButton,
+musicPowerButton,
+musicMenuClose
+].forEach(
+function (button) {
+
+button.addEventListener(
+"mouseenter",
+function () {
+
+button.setAttribute(
+"scale",
+"1.08 1.08 1.08"
+);
+
+}
+);
+
+button.addEventListener(
+"mouseleave",
+function () {
+
+button.setAttribute(
+"scale",
+"1 1 1"
+);
+
+}
+);
+
+}
+);
+
+/*
+* カテゴリボタンの処理
+*/
+categoryButtons.forEach(function (button) {
+
+button.addEventListener("click", function () {
+
+playClickSound();
+
+selectedCategory =
+button.getAttribute("data-category");
+
+/*
+* AUTOモードならカテゴリーに合わせてBGMも切り替える
+*/
+if (
+selectedMusicMode ===
+"AUTO" &&
+bgmEnabled
+) {
+
+restartBgm(
+true
+);
+
+} else {
+
+updateMusicDisplay();
+
+}
+
+const categoryLabel =
+button.getAttribute("data-label");
+
+setUltimateBackgroundTheme(
+selectedCategory
+);
+
+/*
+* カテゴリーごとに空間の色を変更
+*/
+if (selectedCategory === "love") {
+
+mainSky.setAttribute("color", "#F9DFF0");
+mainGround.setAttribute("color", "#FFF3FA");
+
+loveDecoration.setAttribute("visible", true);
+healthDecoration.setAttribute("visible", false);
+campusDecoration.setAttribute("visible", false);
+
+lovePattern.setAttribute("visible", true);
+healthPattern.setAttribute("visible", false);
+campusPattern.setAttribute("visible", false);
+
+haloOuter.setAttribute("color", "#FFD4E3");
+haloMiddle.setAttribute("color", "#FFFFFF");
+haloInner.setAttribute("color", "#FFBFD5");
+
+} else if (selectedCategory === "health") {
+
+mainSky.setAttribute("color", "#DDF8EE");
+mainGround.setAttribute("color", "#F1FFF8");
+
+loveDecoration.setAttribute("visible", false);
+healthDecoration.setAttribute("visible", true);
+campusDecoration.setAttribute("visible", false);
+
+lovePattern.setAttribute("visible", false);
+healthPattern.setAttribute("visible", true);
+campusPattern.setAttribute("visible", false);
+
+haloOuter.setAttribute("color", "#B8EED4");
+haloMiddle.setAttribute("color", "#FFFFFF");
+haloInner.setAttribute("color", "#8EDDB8");
+
+} else {
+
+mainSky.setAttribute("color", "#CFF6FF");
+mainGround.setAttribute("color", "#ECFFFF");
+
+loveDecoration.setAttribute("visible", false);
+healthDecoration.setAttribute("visible", false);
+campusDecoration.setAttribute("visible", true);
+
+lovePattern.setAttribute("visible", false);
+healthPattern.setAttribute("visible", false);
+campusPattern.setAttribute("visible", true);
+
+haloOuter.setAttribute("color", "#BCEBFA");
+haloMiddle.setAttribute("color", "#FFFFFF");
+haloInner.setAttribute("color", "#8FD5ED");
+
+}
+
+selectedCategoryText.setAttribute(
+"value",
+"CATEGORY : " + categoryLabel
+);
+
+/*
+* すべてのカテゴリボタンを
+* 薄い色に戻す
+*/
+categoryButtons.forEach(function (otherButton) {
+otherButton.setAttribute(
+"color",
+"#DDF8FF"
+);
+});
+
+/*
+* 選ばれたカテゴリだけ
+* 濃い色にする
+*/
+button.setAttribute(
+"color",
+"#55CDEA"
+);
+
+/*
+* カテゴリ変更時は
+* 結果画面を閉じる
+*/
+resultPanel.setAttribute(
+"visible",
+false
+);
+
+analyzingPanel.setAttribute(
+"visible",
+false
+);
+});
+
+button.addEventListener("mouseenter", function () {
+button.setAttribute(
+"scale",
+"1.08 1.08 1.08"
+);
+});
+
+button.addEventListener("mouseleave", function () {
+button.setAttribute(
+"scale",
+"1 1 1"
+);
+});
+});
+
+/*
+* MBTIボタンの処理
+*/
+mbtiButtons.forEach(function (button) {
+
+button.addEventListener("click", function () {
+
+playClickSound();
+
+const selectedMbti =
+button.getAttribute("data-mbti");
+
+if (
+musicMenu.getAttribute(
+"visible"
+)
+) {
+
+musicMenu.setAttribute(
+"visible",
+false
+);
+
+}
+
+/*
+* 画像ファイルの場所
+*
+* 例：
+* images/love/INTJ.png
+* images/health/INTJ.png
+* images/campus/INTJ.png
+*/
+/*
+ * カテゴリとMBTIに対応する画像ファイル
+ * HEALTH画像は health_card_1～16 を使います。
+ */
+ 
+const healthImages = {
+INFP: "health_card_1.png",
+ENFP: "health_card_2.png",
+INFJ: "health_card_3.png",
+ENFJ: "health_card_4.png",
+INTJ: "health_card_5.png",
+INTP: "health_card_6.png",
+ENTJ: "health_card_7.png",
+ENTP: "health_card_8.png",
+ISTJ: "health_card_9.png",
+ISFJ: "health_card_10.png",
+ESTJ: "health_card_11.png",
+ESFJ: "health_card_12.png",
+ISTP: "health_card_13.png",
+ISFP: "health_card_14.png",
+ESTP: "health_card_15.png",
+ESFP: "health_card_16.png"
+};
+
+const campusImages = {
+INFP: "university_card_1.png",
+ENFP: "university_card_2.png",
+INFJ: "university_card_3.png",
+ENFJ: "university_card_4.png",
+INTJ: "university_card_5.png",
+INTP: "university_card_6.png",
+ENTJ: "university_card_7.png",
+ENTP: "university_card_8.png",
+ISTJ: "university_card_9.png",
+ISFJ: "university_card_10.png",
+ESTJ: "university_card_11.png",
+ESFJ: "university_card_12.png",
+ISTP: "university_card_13.png",
+ISFP: "university_card_14.png",
+ESTP: "university_card_15.png",
+ESFP: "university_card_16.png"
+};
+
+let imagePath;
+
+if (selectedCategory === "health") {
+imagePath = "images/health/" + healthImages[selectedMbti];
+} else if (selectedCategory === "campus") {
+imagePath = "images/campus/" + campusImages[selectedMbti];
+} else {
+imagePath = "images/love/" + selectedMbti + ".jpeg";
+}
+
+/*
+* 画像が本当に存在するか確認してから表示する
+*/
+console.log("読み込む画像:", imagePath);
+
+resultImage.setAttribute("visible", false);
+imageErrorText.setAttribute("visible", false);
+
+resultPanel.setAttribute("visible", false);
+resultPanel.setAttribute("scale", "0.01 0.01 0.01");
+
+analyzingPanel.removeAttribute("animation__analyze");
+analyzingPanel.setAttribute("scale", "0.01 0.01 0.01");
+analyzingPanel.setAttribute("visible", true);
+
+analyzingPanel.setAttribute(
+"animation__analyze",
+"property: scale; from: 0.01 0.01 0.01; to: 1 1 1; dur: 280; easing: easeOutBack"
+);
+
+const imageLoader = new Image();
+
+imageLoader.onload = function () {
+
+setTimeout(function () {
+
+analyzingPanel.setAttribute("visible", false);
+
+resultImage.setAttribute("src", imagePath);
+resultImage.setAttribute("visible", true);
+imageErrorText.setAttribute("visible", false);
+
+resultPanel.removeAttribute("animation__popup");
+resultPanel.setAttribute("scale", "0.01 0.01 0.01");
+resultPanel.setAttribute("visible", true);
+
+resultPanel.setAttribute(
+"animation__popup",
+"property: scale; from: 0.01 0.01 0.01; to: 1 1 1; dur: 480; easing: easeOutBack"
+);
+
+playResultSound();
+
+resultSparkles
+.querySelectorAll(".burst-spark")
+.forEach(function (spark) {
+spark.setAttribute("scale", "0.01 0.01 0.01");
+spark.emit("burst");
+});
+
+}, 800);
+
+};
+
+imageLoader.onerror = function () {
+
+console.error("画像が見つかりません:", imagePath);
+
+setTimeout(function () {
+
+analyzingPanel.setAttribute("visible", false);
+
+resultImage.removeAttribute("src");
+resultImage.setAttribute("visible", false);
+
+imageErrorText.setAttribute(
+"value",
+"IMAGE NOT FOUND\n" + imagePath
+);
+
+imageErrorText.setAttribute("visible", true);
+
+resultPanel.setAttribute("scale", "1 1 1");
+resultPanel.setAttribute("visible", true);
+
+}, 500);
+
+};
+
+imageLoader.src = imagePath;
+});
+
+button.addEventListener("mouseenter", function () {
+button.setAttribute(
+"color",
+"#62D7F2"
+);
+
+button.setAttribute(
+"scale",
+"1.08 1.08 1.08"
+);
+});
+
+button.addEventListener("mouseleave", function () {
+button.setAttribute(
+"color",
+"#AEEFFF"
+);
+
+button.setAttribute(
+"scale",
+"1 1 1"
+);
+});
+});
+
+/*
+* 結果画面を閉じる
+*/
+closeButton.addEventListener("click", function () {
+
+playClickSound();
+
+resultPanel.setAttribute(
+"animation__close",
+"property: scale; to: 0.01 0.01 0.01; dur: 220; easing: easeInCubic"
+);
+
+setTimeout(
+function () {
+
+resultPanel.setAttribute(
+"visible",
+false
+);
+
+resultImage.setAttribute(
+"visible",
+false
+);
+
+imageErrorText.setAttribute(
+"visible",
+false
+);
+
+analyzingPanel.setAttribute(
+"visible",
+false
+);
+
+resultPanel.setAttribute(
+"scale",
+"0.01 0.01 0.01"
+);
+
+resultPanel.removeAttribute(
+"animation__close"
+);
+
+},
+230
+);
+});
+
+closeButton.addEventListener("mouseenter", function () {
+closeButton.setAttribute(
+"color",
+"#FF6F88"
+);
+
+closeButton.setAttribute(
+"scale",
+"1.12 1.12 1.12"
+);
+});
+
+closeButton.addEventListener("mouseleave", function () {
+closeButton.setAttribute(
+"color",
+"#FF9FAF"
+);
+
+closeButton.setAttribute(
+"scale",
+"1 1 1"
+);
+});
+
+});
+</script>
+
+
+<script>
+(function () {
+
+    const intro =
+        document.getElementById("mobileIntro");
+
+    const introHome =
+        document.getElementById("introHome");
+
+    const helpScreen =
+        document.getElementById("mbtiHelpScreen");
+
+    const startButton =
+        document.getElementById("introStartButton");
+
+    const showHelpButton =
+        document.getElementById("showMbtiHelpButton");
+
+    const openTestButton =
+        document.getElementById("openMbtiTestButton");
+
+    const helpToAppButton =
+        document.getElementById("helpToAppButton");
+
+    const backButton =
+        document.getElementById("backIntroButton");
+
+    const installButton =
+        document.getElementById("installAppButton");
+
+    const installHint =
+        document.getElementById("installHint");
+
+    let deferredInstallPrompt = null;
+
+    function enterApp() {
+
+        intro.style.opacity = "0";
+        intro.style.transition = "opacity .35s ease";
+
+        setTimeout(function () {
+            intro.style.display = "none";
+        }, 360);
+
+    }
+
+    function showHelp() {
+
+        introHome.style.display = "none";
+        helpScreen.style.display = "block";
+        intro.scrollTop = 0;
+
+    }
+
+    function showHome() {
+
+        helpScreen.style.display = "none";
+        introHome.style.display = "block";
+        intro.scrollTop = 0;
+
+    }
+
+    startButton.addEventListener(
+        "click",
+        enterApp
+    );
+
+    showHelpButton.addEventListener(
+        "click",
+        showHelp
+    );
+
+    helpToAppButton.addEventListener(
+        "click",
+        enterApp
+    );
+
+    backButton.addEventListener(
+        "click",
+        showHome
+    );
+
+    openTestButton.addEventListener(
+        "click",
+        function () {
+
+            window.open(
+                "https://www.16personalities.com/ja",
+                "_blank",
+                "noopener"
+            );
+
+        }
+    );
+
+    /*
+     * Android系PWAインストール
+     */
+    window.addEventListener(
+        "beforeinstallprompt",
+        function (event) {
+
+            event.preventDefault();
+            deferredInstallPrompt = event;
+
+        }
+    );
+
+    installButton.addEventListener(
+        "click",
+        async function () {
+
+            if (deferredInstallPrompt) {
+
+                deferredInstallPrompt.prompt();
+
+                await deferredInstallPrompt.userChoice;
+
+                deferredInstallPrompt = null;
+
+                installHint.style.display = "block";
+                installHint.textContent =
+                    "インストール画面を表示しました。";
+
+                return;
+            }
+
+            const ua =
+                navigator.userAgent.toLowerCase();
+
+            const isIOS =
+                /iphone|ipad|ipod/.test(ua);
+
+            installHint.style.display = "block";
+
+            if (isIOS) {
+
+                installHint.innerHTML =
+                    "iPhoneではSafariの共有ボタンを押して、" +
+                    "「ホーム画面に追加」を選んでください。";
+
+            } else {
+
+                installHint.innerHTML =
+                    "ブラウザのメニューから「アプリをインストール」" +
+                    "または「ホーム画面に追加」を選んでください。";
+
+            }
+
+        }
+    );
+
+    /*
+     * Service Worker
+     */
+    if ("serviceWorker" in navigator) {
+
+        window.addEventListener(
+            "load",
+            function () {
+
+                navigator.serviceWorker.register(
+                    "./sw.js"
+                ).catch(
+                    function (error) {
+                        console.log(
+                            "Service Worker:",
+                            error
+                        );
+                    }
+                );
+
+            }
+        );
+
+    }
+
+})();
+</script>
+
+</body>
+</html>
